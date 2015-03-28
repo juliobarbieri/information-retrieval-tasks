@@ -5,14 +5,19 @@ Created on Tue Mar 24 2015
 @author: Julio Barbieri
 """
 
+import logging
 import util
-from util import show_error
 from util import file_exists
+from util import exit_error
+from util import setup_logger
 from xml.etree.ElementTree import ElementTree
 
 def leia(filename, abstract_list):
+	logger = setup_logger('indexer_logger', util.MODULO_1_LOG)
+	
 	if not file_exists(filename):
-		show_error(util.FILE_NOT_FOUND + filename)
+		logger.error(util.FILE_NOT_FOUND + filename)
+		exit_error(util.EXITED_WITH_ERROR)
 	
 	xml = ElementTree().parse(filename)
 
@@ -44,9 +49,12 @@ def format_text(text):
 	return text.upper()
 	
 def get_values(line, count):
+	logger =  setup_logger('indexer_logger', util.MODULO_1_LOG)
+	
 	cmd = line.split(util.GENERATOR_SEPARATOR)
 	if len(cmd) < 2 or len(cmd) > 2:
-		show_error(util.FORMAT_ERROR + str(count + 1))
+		logger.error(util.FORMAT_ERROR + str(count + 1))
+		exit_error(util.EXITED_WITH_ERROR)
 		
 	next_cmd = cmd[0]
 	filename = cmd[1]
@@ -57,13 +65,18 @@ def get_values(line, count):
 	return (next_cmd, filename)
 	
 def parse_command_file():
+	logger =  setup_logger('indexer_logger', util.MODULO_1_LOG)
+	
 	abstract_list = {}
 	
 	write = False
 	fname = util.GENERATOR_FILENAME
 	
 	if not file_exists(fname):
-		show_error(util.FILE_NOT_FOUND + fname)
+		logger.error(util.FILE_NOT_FOUND + fname)
+		exit_error(util.EXITED_WITH_ERROR)
+	
+	logger.debug(util.READ_CONFIG_STARTED + fname)
 	
 	with open(fname) as fp:
 		count = 0
@@ -71,7 +84,8 @@ def parse_command_file():
 			next_cmd, filename = get_values(line, count)
 			
 			if write == True:
-				show_error(util.INSTRUCTION_ORDER_ERROR + str(count + 1))
+				logger.error(util.INSTRUCTION_ORDER_ERROR + str(count + 1))
+				exit_error(util.EXITED_WITH_ERROR)
 			
 			if next_cmd == util.CMD_LEIA:
 				leia(filename, abstract_list)
@@ -79,7 +93,10 @@ def parse_command_file():
 				write = True
 				escreva(filename, abstract_list)
 			else:
-				show_error(util.NE_INSTRUCTION_ERROR + str(count + 1))
+				logger.error(util.NE_INSTRUCTION_ERROR + str(count + 1))
+				exit_error(util.EXITED_WITH_ERROR)
 			count = count + 1
 			
+	logger.debug(util.LINES_READED_CONFIG.replace('x', str(count)))
+
 parse_command_file()
