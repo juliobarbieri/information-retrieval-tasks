@@ -5,12 +5,15 @@ Created on Tue Mar 24 2015
 @author: Julio Barbieri
 """
 
+import nltk
 import logging
 import util
 from util import file_exists
 from util import exit_error
 from util import setup_logger
+from inverted_list import InvertedList
 from xml.etree.ElementTree import ElementTree
+from nltk.stem.snowball import EnglishStemmer
 
 def leia(filename, abstract_list):
 	logger = setup_logger('indexer_logger', util.MODULO_1_LOG)
@@ -36,8 +39,15 @@ def leia(filename, abstract_list):
 			
 		abstract_list[key] = format_text(text)
 		
-	#print(abstract_list)
 def escreva(filename, abstract_list):
+	index = InvertedList(nltk.word_tokenize, EnglishStemmer(), nltk.corpus.stopwords.words('english'))
+	
+	for key in abstract_list:
+		index.add(key, abstract_list[key])
+		
+	for id in index.index:
+		print(index.retrieve(id))
+
 	print("Escreva")
 	'''TODO'''
 	
