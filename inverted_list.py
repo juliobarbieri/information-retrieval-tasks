@@ -1,3 +1,10 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Mar 28 2015
+@author: Julio Barbieri
+"""
+
 import nltk
 from collections import defaultdict
 from nltk.stem.snowball import EnglishStemmer
