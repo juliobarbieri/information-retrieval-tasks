@@ -23,9 +23,14 @@ INSTRUCTION_ORDER_ERROR	=	'Instrução de leia após instrução de escreva, ' +
 FILE_NOT_FOUND			=	'Arquivo não encontrado, nome: '
 
 MODULO_1_LOG			=	'lista_invertida.log'
-CONFIG_READ_HEADER		=	'Leitura do arquivo de configuração'
+CONFIG_READ_HEADER		=	'Leitura do arquivo de configuração para geração da lista invertida'
 READ_CONFIG_STARTED		=	'Iniciando leitura do arquivo de configuração: '
+TUPLES_READED_FILE		=	'Lidas x tuplas do arquivo: '
+GENERATING_INV_LIST		=	'Gerando a lista invertida com base nos dados lidos.'
+WRITING_INVERTED_LIST	=	'Escrevendo a lista invertida gerada em: '
+CONFIG_END_PROCESSING	=	'Finzalizando a etapa de geração de uma lista invertida'
 LINES_READED_CONFIG		=	'Lidas x linhas do arquivo de configuração.'
+NO_FILE_SPECIFIED		=	'Arquivo não especificado para geração da lista invertida.'
 
 def setup_logger(name, filename):
 	logger = logging.getLogger(name)

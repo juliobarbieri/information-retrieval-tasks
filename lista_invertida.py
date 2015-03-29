@@ -23,6 +23,8 @@ def leia(filename, abstract_list):
 		exit_error(util.EXITED_WITH_ERROR)
 	
 	xml = ElementTree().parse(filename)
+	
+	qntd_dados = 0
 
 	for i, record in enumerate(xml.findall('RECORD')):
 		key = 0
@@ -37,19 +39,30 @@ def leia(filename, abstract_list):
 			for j, extract in enumerate(record.findall('EXTRACT')):
 				text = extract.text
 			
+		qntd_dados = qntd_dados + 1
 		abstract_list[key] = format_text(text)
-		
+	
+	logger.debug(util.TUPLES_READED_FILE.replace('x', str(qntd_dados)) + filename)
+	
 def escreva(filename, abstract_list):
+	logger = setup_logger('indexer_logger', util.MODULO_1_LOG)
+	
+	if filename == '':
+		logger.error(util.NO_FILE_SPECIFIED)
+		exit_error(util.EXITED_WITH_ERROR)
+	
+	logger.debug(util.GENERATING_INV_LIST)
+	
+	fw = open(filename, 'w') 
 	index = InvertedList(nltk.word_tokenize, EnglishStemmer(), nltk.corpus.stopwords.words('english'))
 	
 	for key in abstract_list:
 		index.add(key, abstract_list[key])
-		
+	
+	logger.debug(util.WRITING_INVERTED_LIST + filename)
+	
 	for id in index.index:
-		print(index.retrieve(id))
-
-	print("Escreva")
-	'''TODO'''
+		fw.write(index.retrieve(id) + '\n')
 	
 def format_text(text):
 	chars_to_remove = ['.', ',', '!', '?', '\n']
@@ -108,5 +121,6 @@ def parse_command_file():
 			count = count + 1
 			
 	logger.debug(util.LINES_READED_CONFIG.replace('x', str(count)))
+	logger.debug(util.CONFIG_END_PROCESSING)
 
 parse_command_file()
