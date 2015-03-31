@@ -11,12 +11,13 @@ import util
 from util import file_exists
 from util import exit_error
 from util import setup_logger
+from util import get_values
 from inverted_list import InvertedList
 from xml.etree.ElementTree import ElementTree
 from nltk.stem.snowball import EnglishStemmer
 
 def leia(filename, abstract_list):
-	logger = setup_logger('indexer_logger', util.MODULO_1_LOG)
+	logger = setup_logger(util.NAME_ILG_LOGGER, util.IL_GENERATOR_LOG)
 	
 	if not file_exists(filename):
 		logger.error(util.FILE_NOT_FOUND + filename)
@@ -45,7 +46,7 @@ def leia(filename, abstract_list):
 	logger.debug(util.TUPLES_READED_FILE.replace('x', str(qntd_dados)) + filename)
 	
 def escreva(filename, abstract_list):
-	logger = setup_logger('indexer_logger', util.MODULO_1_LOG)
+	logger = setup_logger(util.NAME_ILG_LOGGER, util.IL_GENERATOR_LOG)
 	
 	if filename == '':
 		logger.error(util.NO_FILE_SPECIFIED)
@@ -65,30 +66,14 @@ def escreva(filename, abstract_list):
 		fw.write(index.retrieve(id) + '\n')
 	
 def format_text(text):
-	chars_to_remove = ['.', ',', '!', '?', '\n']
+	chars_to_remove = ['.', ',', '!', '?', ';', ':', '\n']
 	sc = set(chars_to_remove)
 	text = ''.join([c for c in text if c not in sc])
 
 	return text.upper()
 	
-def get_values(line, count):
-	logger =  setup_logger('indexer_logger', util.MODULO_1_LOG)
-	
-	cmd = line.split(util.GENERATOR_SEPARATOR)
-	if len(cmd) < 2 or len(cmd) > 2:
-		logger.error(util.FORMAT_ERROR + str(count + 1))
-		exit_error(util.EXITED_WITH_ERROR)
-		
-	next_cmd = cmd[0]
-	filename = cmd[1]
-	
-	if filename.endswith('\n'):
-		filename = filename[:-1]
-	
-	return (next_cmd, filename)
-	
 def parse_command_file():
-	logger =  setup_logger('indexer_logger', util.MODULO_1_LOG)
+	logger =  setup_logger(util.NAME_ILG_LOGGER, util.IL_GENERATOR_LOG)
 	
 	abstract_list = {}
 	
@@ -104,7 +89,7 @@ def parse_command_file():
 	with open(fname) as fp:
 		count = 0
 		for line in fp:
-			next_cmd, filename = get_values(line, count)
+			next_cmd, filename = get_values(line, count, util.NAME_ILG_LOGGER, util.IL_GENERATOR_LOG)
 			
 			if write == True:
 				logger.error(util.INSTRUCTION_ORDER_ERROR + str(count + 1))

@@ -24,7 +24,7 @@ class InvertedList:
 	def retrieve(self, word):
 		word = word.upper()
 		
-		return word + ';' + str([id for id in self.index.get(word)]).replace(' ', '')
+		return word + ';' + str([id for id in self.index.get(word)]).replace(' ', '').replace('\'', '')
  
 	def add(self, identifier, document):
 		for token in [t.lower() for t in nltk.word_tokenize(document)]:
@@ -36,5 +36,5 @@ class InvertedList:
 			
 			self.id = identifier
  
-			if self.id not in self.index[token]:
+			if self.id not in self.index[token.upper()]:
 				self.index[token.upper()].append(self.id)

@@ -9,8 +9,9 @@ import logging
 import sys
 import os.path
 
-GENERATOR_SEPARATOR		=	'='
+SEPARATOR				=	'='
 GENERATOR_FILENAME		=	'gli.cfg'
+INDEXER_FILENAME		=	'index.cfg'
 
 CMD_LEIA				=	'LEIA'
 CMD_ESCREVA				=	'ESCREVA'
@@ -20,9 +21,14 @@ EXITED_WITH_ERROR		=	'Programa encerrado com erros, verificar o log de execuçã
 FORMAT_ERROR 			=	'Erro na formatação do arquivo inserido, ' + LINE
 NE_INSTRUCTION_ERROR	=	'Instrução não existente, ' + LINE
 INSTRUCTION_ORDER_ERROR	=	'Instrução de leia após instrução de escreva, ' + LINE
+NE_IO_INSTRUCTION_ERROR	=	'Instrução não existente ou ordem de leia e escreva invertidas, ' + LINE
 FILE_NOT_FOUND			=	'Arquivo não encontrado, nome: '
 
-MODULO_1_LOG			=	'lista_invertida.log'
+NAME_ILG_LOGGER			=	'inverted_list_generator_logger'
+NAME_INDEXER_LOGGER		=	'indexer_logger'
+
+IL_GENERATOR_LOG		=	'inverted_list_generator.log'
+INDEXER_LOG				=	'indexer.log'
 CONFIG_READ_HEADER		=	'Leitura do arquivo de configuração para geração da lista invertida'
 READ_CONFIG_STARTED		=	'Iniciando leitura do arquivo de configuração: '
 TUPLES_READED_FILE		=	'Lidas x tuplas do arquivo: '
@@ -50,6 +56,22 @@ def setup_logger(name, filename):
 	logger.addHandler(file_handler)
 	
 	return logger
+	
+def get_values(line, count, log_name, log_file):
+	logger =  setup_logger(log_name, log_file)
+	
+	cmd = line.split(SEPARATOR)
+	if len(cmd) < 2 or len(cmd) > 2:
+		logger.error(FORMAT_ERROR + str(count + 1))
+		exit_error(EXITED_WITH_ERROR)
+		
+	next_cmd = cmd[0]
+	filename = cmd[1]
+	
+	if filename.endswith('\n'):
+		filename = filename[:-1]
+	
+	return (next_cmd, filename)
 
 def exit_error(message):
 	sys.exit(message)
