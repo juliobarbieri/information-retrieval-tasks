@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Created on Tue Mar 28 2015
+Created on Sat Mar 28 2015
 @author: Julio Barbieri
 """
 
@@ -35,6 +35,4 @@ class InvertedList:
 				token = self.stemmer.stem(token)
 			
 			self.id = identifier
- 
-			if self.id not in self.index[token.upper()]:
-				self.index[token.upper()].append(self.id)
+			self.index[token.upper()].append(self.id)
