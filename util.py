@@ -13,9 +13,12 @@ SEPARATOR				=	'='
 INVERTED_LIST_SEPARATOR	=	';'
 GENERATOR_FILENAME		=	'gli.cfg'
 INDEXER_FILENAME		=	'index.cfg'
+QP_FILENAME				=	'pc.cfg'
 
 CMD_LEIA				=	'LEIA'
 CMD_ESCREVA				=	'ESCREVA'
+CMD_CONSULTAS			=	'CONSULTAS'
+CMD_RESULTADOS			=	'RESULTADOS'
 
 LINE					=	'linha '
 EXITED_WITH_ERROR		=	'Programa encerrado com erros, verificar o log de execução.'
@@ -27,9 +30,12 @@ FILE_NOT_FOUND			=	'Arquivo não encontrado, nome: '
 
 NAME_ILG_LOGGER			=	'inverted_list_generator_logger'
 NAME_INDEXER_LOGGER		=	'indexer_logger'
+NAME_QP_LOGGER			=	'query_processor_logger'
 
 IL_GENERATOR_LOG		=	'inverted_list_generator.log'
 INDEXER_LOG				=	'indexer.log'
+QUERY_PROCESSOR_LOG		=	'query_processor.log'
+
 CONFIG_READ_HEADER		=	'Leitura do arquivo de configuração para geração da lista invertida'
 READ_CONFIG_STARTED		=	'Iniciando leitura do arquivo de configuração: '
 TUPLES_READED_FILE		=	'Lidas x tuplas do arquivo: '
@@ -40,6 +46,8 @@ CONFIG_END_PROCESSING	=	'Finzalizando a etapa de geração de uma lista invertid
 LINES_READED_CONFIG		=	'Lidas x linhas do arquivo de configuração.'
 NO_FILE_SPECIFIED		=	'Arquivo não especificado para geração da lista invertida.'
 SAVING_STRUCTURE		=	'Salvando estrutura do modelo vetorial no arquivo: '
+WRITING_QUERIES			=	'Escrevendo as consultas no arquivo: '
+WRITING_EXPECTED_RESULTS=	'Escrevendo os resultados esperados das consultas no arquivo: '
 
 def setup_logger(name, filename):
 	logger = logging.getLogger(name)

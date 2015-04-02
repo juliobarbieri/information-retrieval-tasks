@@ -66,7 +66,7 @@ def escreva(filename, abstract_list):
 		fw.write(index.retrieve(id) + '\n')
 	
 def format_text(text):
-	chars_to_remove = ['.', ',', '!', '?', ';', ':', '\n']
+	chars_to_remove = ['.', ',', '!', '?', ';', ':', '(', ')', '\n']
 	sc = set(chars_to_remove)
 	text = ''.join([c for c in text if c not in sc])
 
