@@ -89,7 +89,7 @@ def parse_command_file():
 	with open(fname) as fp:
 		count = 0
 		for line in fp:
-			next_cmd, filename = get_values(line, count, util.NAME_ILG_LOGGER, util.IL_GENERATOR_LOG)
+			next_cmd, filename = get_values(line, count, util.CONFIG_SEPARATOR, util.NAME_ILG_LOGGER, util.IL_GENERATOR_LOG)
 			
 			if write == True:
 				logger.error(util.INSTRUCTION_ORDER_ERROR + str(count + 1))

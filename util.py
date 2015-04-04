@@ -9,16 +9,18 @@ import logging
 import sys
 import os.path
 
-SEPARATOR				=	'='
-INVERTED_LIST_SEPARATOR	=	';'
+CONFIG_SEPARATOR		=	'='
+CSV_SEPARATOR			=	';'
 GENERATOR_FILENAME		=	'gli.cfg'
 INDEXER_FILENAME		=	'index.cfg'
 QP_FILENAME				=	'pc.cfg'
+SEARCH_ENGINE_FILENAME	=	'busca.cfg'
 
 CMD_LEIA				=	'LEIA'
 CMD_ESCREVA				=	'ESCREVA'
 CMD_CONSULTAS			=	'CONSULTAS'
 CMD_RESULTADOS			=	'RESULTADOS'
+CMD_MODELO				=	'MODELO'
 
 LINE					=	'linha '
 EXITED_WITH_ERROR		=	'Programa encerrado com erros, verificar o log de execução.'
@@ -31,10 +33,12 @@ FILE_NOT_FOUND			=	'Arquivo não encontrado, nome: '
 NAME_ILG_LOGGER			=	'inverted_list_generator_logger'
 NAME_INDEXER_LOGGER		=	'indexer_logger'
 NAME_QP_LOGGER			=	'query_processor_logger'
+NAME_SE_LOGGER			=	'search_engine_logger'
 
 IL_GENERATOR_LOG		=	'inverted_list_generator.log'
 INDEXER_LOG				=	'indexer.log'
 QUERY_PROCESSOR_LOG		=	'query_processor.log'
+SEARCH_ENGINE_LOG		=	'search_engine.log'
 
 CONFIG_READ_HEADER		=	'Leitura do arquivo de configuração para geração da lista invertida'
 READ_CONFIG_STARTED		=	'Iniciando leitura do arquivo de configuração: '
@@ -46,8 +50,10 @@ CONFIG_END_PROCESSING	=	'Finzalizando a etapa de geração de uma lista invertid
 LINES_READED_CONFIG		=	'Lidas x linhas do arquivo de configuração.'
 NO_FILE_SPECIFIED		=	'Arquivo não especificado para geração da lista invertida.'
 SAVING_STRUCTURE		=	'Salvando estrutura do modelo vetorial no arquivo: '
+STRUCTURE_LOADED		=	'Estrutura carregada à partir do arquivo: '
 WRITING_QUERIES			=	'Escrevendo as consultas no arquivo: '
 WRITING_EXPECTED_RESULTS=	'Escrevendo os resultados esperados das consultas no arquivo: '
+READING_QUERIES			=	'Leando as consultas no arquivo: '
 
 def setup_logger(name, filename):
 	logger = logging.getLogger(name)
@@ -68,10 +74,10 @@ def setup_logger(name, filename):
 	
 	return logger
 	
-def get_values(line, count, log_name, log_file):
+def get_values(line, count, separator, log_name, log_file):
 	logger =  setup_logger(log_name, log_file)
 	
-	cmd = line.split(SEPARATOR)
+	cmd = line.split(separator)
 	if len(cmd) < 2 or len(cmd) > 2:
 		logger.error(FORMAT_ERROR + str(count + 1))
 		exit_error(EXITED_WITH_ERROR)

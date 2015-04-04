@@ -20,7 +20,7 @@ from vector_space_model import VectorSpaceModel
 from xml.etree.ElementTree import ElementTree
 from nltk.stem.snowball import EnglishStemmer
 
-def leia(filename, struct):
+def leia(filename):
 	logger =  setup_logger(util.NAME_INDEXER_LOGGER, util.INDEXER_LOG)
 	
 	if not file_exists(filename):
@@ -62,7 +62,7 @@ def leia(filename, struct):
 	#		idx = set_ids.index(doc)
 	#		termo_documento[idx,j] = termo_documento[idx,j] + 1
 	
-	
+	return struct
 	
 def escreva(filename, struct):
 	logger =  setup_logger(util.NAME_INDEXER_LOGGER, util.INDEXER_LOG)
@@ -73,13 +73,13 @@ def escreva(filename, struct):
 	
 	logger.debug(util.SAVING_STRUCTURE + filename)
 	
-	afile = open(r'test.pkl', 'wb')
+	afile = open(filename, 'wb')
 	pickle.dump(struct, afile)
 	afile.close()
 	
 def trata_lista(line):
 	line = line[:-1]
-	vet_line = line.split(util.INVERTED_LIST_SEPARATOR)
+	vet_line = line.split(util.CSV_SEPARATOR)
 	
 	termo = vet_line[0]
 	documentos = vet_line[1]
@@ -117,10 +117,10 @@ def parse_command_file():
 	with open(fname) as fp:
 		count = 0
 		for line in fp:
-			next_cmd, filename = get_values(line, count, util.NAME_INDEXER_LOGGER, util.INDEXER_LOG)
+			next_cmd, filename = get_values(line, count, util.CONFIG_SEPARATOR, util.NAME_INDEXER_LOGGER, util.INDEXER_LOG)
 			
 			if next_cmd == util.CMD_LEIA and count == 0:
-				leia(filename, struct)
+				struct = leia(filename)
 			elif next_cmd == util.CMD_ESCREVA and count == 1:
 				escreva(filename, struct)
 			else:

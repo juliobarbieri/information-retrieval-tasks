@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Created on Tue Mar 24 2015
+Created on Tue Mar 31 2015
 @author: Julio Barbieri
 """
 
@@ -104,7 +104,7 @@ def parse_command_file():
 	with open(fname) as fp:
 		count = 0
 		for line in fp:
-			next_cmd, filename = get_values(line, count, util.NAME_QP_LOGGER, util.QUERY_PROCESSOR_LOG)
+			next_cmd, filename = get_values(line, count, util.CONFIG_SEPARATOR, util.NAME_QP_LOGGER, util.QUERY_PROCESSOR_LOG)
 			
 			if query == False and results == True:
 				logger.error(util.INSTRUCTION_ORDER_ERROR + str(count + 1))
