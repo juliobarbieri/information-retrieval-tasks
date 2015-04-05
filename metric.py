@@ -27,7 +27,7 @@ class Metric:
 			words_array = self.pre_process(query)
 			relevances = []
 			for word in words_array:
-				if word in stopwords:
+				if word in stopwords: #or word not in self.vector_space_model.name_cols:
 					continue
 				relevance = self.calc_relevance(word)
 				if len(relevances) == 0:
@@ -45,7 +45,6 @@ class Metric:
 			relevances_documents = sorted(relevances_documents.items(), key=lambda x: x[1], reverse=True)
 			query_results[key] = relevances_documents
 		
-		#print(query_results)
 		return query_results
 		
 	def pre_process(self, query):
@@ -63,7 +62,7 @@ class Metric:
 		total_oc_termo = self.vector_space_model.ocorrencia_total_termo(word)
 	
 		if n != None and total_oc_termo != None:
-			tf = self.vector_space_model.return_term_column(word)/total_oc_termo
+			tf = self.vector_space_model.return_term_column(word) 
 			return self.tf_idf(tf, max(tf), N, n)
 		else:
 			return np.zeros(N)

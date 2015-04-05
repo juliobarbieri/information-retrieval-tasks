@@ -24,10 +24,12 @@ def leia(filename):
 	logger =  setup_logger(util.NAME_INDEXER_LOGGER, util.INDEXER_LOG)
 	
 	if not file_exists(filename):
-		logger.error(util.FILE_NOT_FOUND + filename)
+		logger.error(util.FILE_NOT_FOUND % filename)
 		exit_error(util.EXITED_WITH_ERROR)
 	
 	indexes = {}
+	
+	start_time = time.time()
 	
 	with open(filename) as fp:
 		lidos = 0
@@ -39,7 +41,9 @@ def leia(filename):
 				indexes[termo] = documentos
 				aproveitados = aproveitados + 1
 				
-	logger.debug(util.LINES_READED_USED_FILE.replace('x', str(lidos)).replace('y', str(aproveitados)) + filename)
+	logger.debug(util.WORDS_TIME % (time.time() - start_time))
+	
+	logger.debug(util.LINES_READED_USED_FILE % (lidos, aproveitados, filename))
 	
 	unique_ids = []
 	unique_terms = []
@@ -48,19 +52,8 @@ def leia(filename):
 		unique_ids.extend(indexes[i])
 		unique_terms.append(i)
 	
-	#set_ids = list(set(unique_ids))
-	#set_terms = list(set(unique_terms))
-	#np.set_printoptions(threshold=np.nan)
-	
 	struct = VectorSpaceModel(list(set(unique_ids)), unique_terms)
 	struct.setup_matrix(indexes)
-	
-	#termo_documento = np.zeros((len(set_ids), len(set_terms)))
-	
-	#for j in range(len(unique_terms)):
-	#	for doc in indexes[unique_terms[j]]:
-	#		idx = set_ids.index(doc)
-	#		termo_documento[idx,j] = termo_documento[idx,j] + 1
 	
 	return struct
 	
@@ -71,7 +64,7 @@ def escreva(filename, struct):
 		logger.error(util.NO_FILE_SPECIFIED)
 		exit_error(util.EXITED_WITH_ERROR)
 	
-	logger.debug(util.SAVING_STRUCTURE + filename)
+	logger.debug(util.SAVING_STRUCTURE % filename)
 	
 	afile = open(filename, 'wb')
 	pickle.dump(struct, afile)
@@ -109,10 +102,10 @@ def parse_command_file():
 	fname = util.INDEXER_FILENAME
 	
 	if not file_exists(fname):
-		logger.error(util.FILE_NOT_FOUND + fname)
+		logger.error(util.FILE_NOT_FOUND % fname)
 		exit_error(util.EXITED_WITH_ERROR)
 	
-	logger.debug(util.READ_CONFIG_STARTED + fname)
+	logger.debug(util.READ_CONFIG_STARTED % fname)
 	
 	with open(fname) as fp:
 		count = 0
@@ -124,11 +117,11 @@ def parse_command_file():
 			elif next_cmd == util.CMD_ESCREVA and count == 1:
 				escreva(filename, struct)
 			else:
-				logger.error(util.NE_IO_INSTRUCTION_ERROR + str(count + 1))
+				logger.error(util.NE_IO_INSTRUCTION_ERROR % (count + 1))
 				exit_error(util.EXITED_WITH_ERROR)
 			count = count + 1
 			
-	logger.debug(util.LINES_READED_CONFIG.replace('x', str(count)))
-	logger.debug(util.CONFIG_END_PROCESSING)
+	logger.debug(util.LINES_READED_CONFIG % count)
+	logger.debug(util.CONFIG_END_PROCESSING % fname)
 
 parse_command_file()

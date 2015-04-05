@@ -20,13 +20,15 @@ def leia(filename, abstract_list):
 	logger = setup_logger(util.NAME_ILG_LOGGER, util.IL_GENERATOR_LOG)
 	
 	if not file_exists(filename):
-		logger.error(util.FILE_NOT_FOUND + filename)
+		logger.error(util.FILE_NOT_FOUND % filename)
 		exit_error(util.EXITED_WITH_ERROR)
 	
 	xml = ElementTree().parse(filename)
 	
 	qntd_dados = 0
-
+	
+	start_time = time.time()
+	
 	for i, record in enumerate(xml.findall('RECORD')):
 		key = 0
 		text = ''
@@ -43,7 +45,9 @@ def leia(filename, abstract_list):
 		qntd_dados = qntd_dados + 1
 		abstract_list[key] = format_text(text)
 	
-	logger.debug(util.TUPLES_READED_FILE.replace('x', str(qntd_dados)) + filename)
+	logger.debug(util.DOCUMENTS_TIME % (time.time() - start_time))
+	
+	logger.debug(util.TUPLES_READED_FILE % (qntd_dados, filename))
 	
 def escreva(filename, abstract_list):
 	logger = setup_logger(util.NAME_ILG_LOGGER, util.IL_GENERATOR_LOG)
@@ -60,7 +64,7 @@ def escreva(filename, abstract_list):
 	for key in abstract_list:
 		index.add(key, abstract_list[key])
 	
-	logger.debug(util.WRITING_INVERTED_LIST + filename)
+	logger.debug(util.WRITING_INVERTED_LIST % filename)
 	
 	for id in index.index:
 		fw.write(index.retrieve(id) + '\n')
@@ -77,14 +81,15 @@ def parse_command_file():
 	
 	abstract_list = {}
 	
+	read = False
 	write = False
 	fname = util.GENERATOR_FILENAME
 	
 	if not file_exists(fname):
-		logger.error(util.FILE_NOT_FOUND + fname)
+		logger.error(util.FILE_NOT_FOUND % fname)
 		exit_error(util.EXITED_WITH_ERROR)
 	
-	logger.debug(util.READ_CONFIG_STARTED + fname)
+	logger.debug(util.READ_CONFIG_STARTED % fname)
 	
 	with open(fname) as fp:
 		count = 0
@@ -92,20 +97,21 @@ def parse_command_file():
 			next_cmd, filename = get_values(line, count, util.CONFIG_SEPARATOR, util.NAME_ILG_LOGGER, util.IL_GENERATOR_LOG)
 			
 			if write == True:
-				logger.error(util.INSTRUCTION_ORDER_ERROR + str(count + 1))
+				logger.error(util.INSTRUCTION_ORDER_ERROR % (count + 1))
 				exit_error(util.EXITED_WITH_ERROR)
 			
 			if next_cmd == util.CMD_LEIA:
+				read = True
 				leia(filename, abstract_list)
-			elif next_cmd == util.CMD_ESCREVA:
+			elif next_cmd == util.CMD_ESCREVA and read == True:
 				write = True
 				escreva(filename, abstract_list)
 			else:
-				logger.error(util.NE_INSTRUCTION_ERROR + str(count + 1))
+				logger.error(util.NE_IO_INSTRUCTION_ERROR % (count + 1))
 				exit_error(util.EXITED_WITH_ERROR)
 			count = count + 1
 			
-	logger.debug(util.LINES_READED_CONFIG.replace('x', str(count)))
-	logger.debug(util.CONFIG_END_PROCESSING)
+	logger.debug(util.LINES_READED_CONFIG % count)
+	logger.debug(util.CONFIG_END_PROCESSING % fname)
 
 parse_command_file()

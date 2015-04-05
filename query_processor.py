@@ -20,7 +20,7 @@ def leia(filename, query_list, query_results):
 	logger = setup_logger(util.NAME_QP_LOGGER, util.QUERY_PROCESSOR_LOG)
 	
 	if not file_exists(filename):
-		logger.error(util.FILE_NOT_FOUND + filename)
+		logger.error(util.FILE_NOT_FOUND % filename)
 		exit_error(util.EXITED_WITH_ERROR)
 	
 	xml = ElementTree().parse(filename)
@@ -48,7 +48,7 @@ def leia(filename, query_list, query_results):
 		query_results[key] = itens
 		query_list[key] = format_text(text)
 	
-	logger.debug(util.TUPLES_READED_FILE.replace('x', str(qntd_dados)) + filename)
+	logger.debug(util.TUPLES_READED_FILE % (qntd_dados, filename))
 	
 def consultas(filename, query_list):
 	logger = setup_logger(util.NAME_QP_LOGGER, util.QUERY_PROCESSOR_LOG)
@@ -57,7 +57,7 @@ def consultas(filename, query_list):
 		logger.error(util.NO_FILE_SPECIFIED)
 		exit_error(util.EXITED_WITH_ERROR)
 	
-	logger.debug(util.WRITING_QUERIES + filename)
+	logger.debug(util.WRITING_QUERIES % filename)
 	
 	fw = open(filename, 'w') 
 	
@@ -71,7 +71,7 @@ def resultados(filename, query_results):
 		logger.error(util.NO_FILE_SPECIFIED)
 		exit_error(util.EXITED_WITH_ERROR)
 	
-	logger.debug(util.WRITING_EXPECTED_RESULTS + filename)
+	logger.debug(util.WRITING_EXPECTED_RESULTS % filename)
 	
 	fw = open(filename, 'w') 
 	
@@ -96,10 +96,10 @@ def parse_command_file():
 	fname = util.QP_FILENAME
 	
 	if not file_exists(fname):
-		logger.error(util.FILE_NOT_FOUND + fname)
+		logger.error(util.FILE_NOT_FOUND % fname)
 		exit_error(util.EXITED_WITH_ERROR)
 	
-	logger.debug(util.READ_CONFIG_STARTED + fname)
+	logger.debug(util.READ_CONFIG_STARTED % fname)
 	
 	with open(fname) as fp:
 		count = 0
@@ -107,7 +107,7 @@ def parse_command_file():
 			next_cmd, filename = get_values(line, count, util.CONFIG_SEPARATOR, util.NAME_QP_LOGGER, util.QUERY_PROCESSOR_LOG)
 			
 			if query == False and results == True:
-				logger.error(util.INSTRUCTION_ORDER_ERROR + str(count + 1))
+				logger.error(util.INSTRUCTION_ORDER_ERROR % (count + 1))
 				exit_error(util.EXITED_WITH_ERROR)
 			
 			if next_cmd == util.CMD_LEIA:
@@ -119,11 +119,11 @@ def parse_command_file():
 				results = True
 				resultados(filename, query_results)
 			else:
-				logger.error(util.NE_INSTRUCTION_ERROR + str(count + 1))
+				logger.error(util.NE_IO_INSTRUCTION_ERROR % (count + 1))
 				exit_error(util.EXITED_WITH_ERROR)
 			count = count + 1
 			
-	logger.debug(util.LINES_READED_CONFIG.replace('x', str(count)))
-	logger.debug(util.CONFIG_END_PROCESSING)
+	logger.debug(util.LINES_READED_CONFIG % count)
+	logger.debug(util.CONFIG_END_PROCESSING % fname)
 
 parse_command_file()

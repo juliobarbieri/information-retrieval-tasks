@@ -9,6 +9,7 @@ import numpy as np
 import nltk
 import logging
 import pickle
+import time
 import re
 import util
 from util import file_exists
@@ -26,18 +27,14 @@ def modelo(filename):
 	logger = setup_logger(util.NAME_SE_LOGGER, util.SEARCH_ENGINE_LOG)
 	
 	if not file_exists(filename):
-		logger.error(util.FILE_NOT_FOUND + filename)
+		logger.error(util.FILE_NOT_FOUND % fname)
 		exit_error(util.EXITED_WITH_ERROR)
 	
 	afile = open(filename, 'rb')
 	struct = pickle.load(afile)
 	afile.close()
 	
-	#np.set_printoptions(threshold=np.nan)
-	
-	#print(struct.termo_documento)
-	
-	logger.debug(util.STRUCTURE_LOADED + filename)
+	logger.debug(util.STRUCTURE_LOADED % filename)
 	
 	return struct
 	
@@ -48,7 +45,7 @@ def consultas(filename, struct):
 		logger.error(util.NO_FILE_SPECIFIED)
 		exit_error(util.EXITED_WITH_ERROR)
 	
-	logger.debug(util.READING_QUERIES + filename)
+	logger.debug(util.READING_QUERIES % filename)
 	
 	query_list = {}
 	query_results = {}
@@ -58,37 +55,17 @@ def consultas(filename, struct):
 		for line in fp:
 			key, query = get_values(line, count, util.CSV_SEPARATOR, util.NAME_SE_LOGGER, util.SEARCH_ENGINE_LOG)
 			query_list[key] = query
-	'''		
-	stopwords = nltk.corpus.stopwords.words('english')
-	for key in query_list:
-		#print(key)
-		query = query_list[key]
-		words_array = pre_process(query)
-		relevances = []
-		for word in words_array:
-			if word in stopwords:
-				continue
-			relevance = calc_relevance(struct, word)
-			if len(relevances) == 0:
-				relevances = relevance
-			else:
-				#print(str(len(relevances)) + ' ' + str(len(relevance)))
-				for i in range(len(relevance)):
-					relevances[i] = relevances[i] + relevance[i]
-					
-		relevances_documents = {}
-		
-		for element_key, element in zip(struct.name_rows, relevances):
-			if element > 0:
-				relevances_documents[element_key] = element
-		
-		relevances_documents = sorted(relevances_documents.items(), key=lambda x: x[1], reverse=True)
-		query_results[key] = relevances_documents
-		
-	print(query_results)
-	'''
+			count = count + 1
+			
+	logger.debug(util.LINES_READED_FILE % (count, filename))
+	
+	start_time = time.time()
+	
 	metric = Metric(struct)
 	query_results = metric.prepare_data(query_list)
+	
+	logger.debug(util.QUERIES_TIME % (time.time() - start_time))
+	
 	return query_results
 	
 def resultados(filename, query_results):
@@ -98,7 +75,7 @@ def resultados(filename, query_results):
 		logger.error(util.NO_FILE_SPECIFIED)
 		exit_error(util.EXITED_WITH_ERROR)
 	
-	logger.debug(util.WRITING_EXPECTED_RESULTS + filename)
+	logger.debug(util.WRITING_RESULTS % filename)
 	
 	fw = open(filename, 'w') 
 	
@@ -112,43 +89,6 @@ def format_text(text):
 
 	return text.upper()
 	
-'''
-def calc_relevance(struct, word):
-	stemmer = EnglishStemmer()
-	word = stemmer.stem(word).upper()
-	#print(word)
-	N = struct.qntd_documentos()
-	n = struct.qntd_documentos_dado_termo(word)
-	total_oc_termo = struct.ocorrencia_total_termo(word)
-	#t = struct.qntd_termos()
-	
-	if n != None and total_oc_termo != None:
-		tf = struct.return_term_column(word)/total_oc_termo
-		return tf_idf(tf, max(tf), N, n)
-	else:
-		return np.zeros(N)
-	
-def tf_idf(tf, max_tf, total_documentos, n):
-	tf_idfs = []
-	for i in range(len(tf)):
-		tf_idf = term_frquency(tf[i], max_tf) * idf(total_documentos, n)
-		tf_idfs.append(tf_idf)
-	return tf_idfs
-	
-def term_frquency(tf, max_tf):
-	#return 0.5 + ((0.5 * tf)/max_tf)
-	return tf/max_tf
-	
-def idf(total_documentos, n):
-	return log(total_documentos/n)
-	
-def pre_process(query):
-	query = query.replace('/', ' ')
-	query = re.sub(' +',' ',query)
-	words_array = query.split(' ')
-	
-	return words_array
-'''
 def parse_command_file():
 	logger =  setup_logger(util.NAME_SE_LOGGER, util.SEARCH_ENGINE_LOG)
 	
@@ -162,19 +102,15 @@ def parse_command_file():
 	struct = None
 	
 	if not file_exists(fname):
-		logger.error(util.FILE_NOT_FOUND + fname)
+		logger.error(util.FILE_NOT_FOUND % fname)
 		exit_error(util.EXITED_WITH_ERROR)
 	
-	logger.debug(util.READ_CONFIG_STARTED + fname)
+	logger.debug(util.READ_CONFIG_STARTED % fname)
 	
 	with open(fname) as fp:
 		count = 0
 		for line in fp:
 			next_cmd, filename = get_values(line, count, util.CONFIG_SEPARATOR, util.NAME_SE_LOGGER, util.SEARCH_ENGINE_LOG)
-			
-			#if query == False:
-			#	logger.error(util.INSTRUCTION_ORDER_ERROR + str(count + 1))
-			#	exit_error(util.EXITED_WITH_ERROR)
 			
 			if next_cmd == util.CMD_MODELO and results == False:
 				model = True
@@ -186,11 +122,11 @@ def parse_command_file():
 				results = True
 				resultados(filename, query_results)
 			else:
-				logger.error(util.NE_INSTRUCTION_ERROR + str(count + 1))
+				logger.error(util.NE_IO_INSTRUCTION_ERROR % (count + 1))
 				exit_error(util.EXITED_WITH_ERROR)
 			count = count + 1
 			
-	logger.debug(util.LINES_READED_CONFIG.replace('x', str(count)))
-	logger.debug(util.CONFIG_END_PROCESSING)
+	logger.debug(util.LINES_READED_CONFIG % count)
+	logger.debug(util.CONFIG_END_PROCESSING % fname)
 
 parse_command_file()
