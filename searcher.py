@@ -16,18 +16,17 @@ from util import file_exists
 from util import exit_error
 from util import setup_logger
 from util import get_values
-from inverted_list import InvertedList
-from metric import Metric
+from engine import Engine
 from vector_space_model import VectorSpaceModel
 from xml.etree.ElementTree import ElementTree
 from nltk.stem.snowball import EnglishStemmer
 from math import log
 
 def modelo(filename):
-	logger = setup_logger(util.NAME_SE_LOGGER, util.SEARCH_ENGINE_LOG)
+	logger = setup_logger(util.NAME_SEARCHER_LOGGER, util.SEARCHER_LOG)
 	
 	if not file_exists(filename):
-		logger.error(util.FILE_NOT_FOUND % fname)
+		logger.error(util.FILE_NOT_FOUND % filename)
 		exit_error(util.EXITED_WITH_ERROR)
 	
 	afile = open(filename, 'rb')
@@ -39,7 +38,7 @@ def modelo(filename):
 	return struct
 	
 def consultas(filename, struct):
-	logger = setup_logger(util.NAME_SE_LOGGER, util.SEARCH_ENGINE_LOG)
+	logger = setup_logger(util.NAME_SEARCHER_LOGGER, util.SEARCHER_LOG)
 	
 	if filename == '':
 		logger.error(util.NO_FILE_SPECIFIED)
@@ -53,7 +52,7 @@ def consultas(filename, struct):
 	with open(filename) as fp:
 		count = 0
 		for line in fp:
-			key, query = get_values(line, count, util.CSV_SEPARATOR, util.NAME_SE_LOGGER, util.SEARCH_ENGINE_LOG)
+			key, query = get_values(line, count, util.CSV_SEPARATOR, util.NAME_SEARCHER_LOGGER, util.SEARCHER_LOG)
 			query_list[key] = query
 			count = count + 1
 			
@@ -61,15 +60,15 @@ def consultas(filename, struct):
 	
 	start_time = time.time()
 	
-	metric = Metric(struct)
-	query_results = metric.search(query_list)
+	engine = Engine(struct)
+	query_results = engine.search(query_list)
 	
 	logger.debug(util.QUERIES_TIME % (time.time() - start_time))
 	
 	return query_results
 	
 def resultados(filename, query_results):
-	logger = setup_logger(util.NAME_SE_LOGGER, util.SEARCH_ENGINE_LOG)
+	logger = setup_logger(util.NAME_SEARCHER_LOGGER, util.SEARCHER_LOG)
 	
 	if filename == '':
 		logger.error(util.NO_FILE_SPECIFIED)
@@ -85,27 +84,27 @@ def resultados(filename, query_results):
 	fw.close()
 	
 def parse_command_file():
-	logger =  setup_logger(util.NAME_SE_LOGGER, util.SEARCH_ENGINE_LOG)
+	logger =  setup_logger(util.NAME_SEARCHER_LOGGER, util.SEARCHER_LOG)
 	
 	query_results = {}
 	
 	model = False
 	query = False
 	results = False
-	fname = util.SEARCH_ENGINE_FILENAME
+	config_file = util.SEARCHER_FILENAME
 	
 	struct = None
 	
-	if not file_exists(fname):
-		logger.error(util.FILE_NOT_FOUND % fname)
+	if not file_exists(config_file):
+		logger.error(util.FILE_NOT_FOUND % config_file)
 		exit_error(util.EXITED_WITH_ERROR)
 	
-	logger.debug(util.READ_CONFIG_STARTED % fname)
+	logger.debug(util.READ_CONFIG_STARTED % config_file)
 	
-	with open(fname) as fp:
+	with open(config_file) as fp:
 		count = 0
 		for line in fp:
-			next_cmd, filename = get_values(line, count, util.CONFIG_SEPARATOR, util.NAME_SE_LOGGER, util.SEARCH_ENGINE_LOG)
+			next_cmd, filename = get_values(line, count, util.CONFIG_SEPARATOR, util.NAME_SEARCHER_LOGGER, util.SEARCHER_LOG)
 			
 			if next_cmd == util.CMD_MODELO and results == False:
 				model = True
@@ -122,7 +121,7 @@ def parse_command_file():
 			count = count + 1
 			
 	logger.debug(util.LINES_READED_CONFIG % count)
-	logger.debug(util.CONFIG_END_PROCESSING % fname)
+	logger.debug(util.CONFIG_END_PROCESSING % config_file)
 
 if __name__ == "__main__":
 	parse_command_file()

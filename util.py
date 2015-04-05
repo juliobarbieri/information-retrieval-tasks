@@ -11,10 +11,10 @@ import os.path
 
 CONFIG_SEPARATOR		=	'='
 CSV_SEPARATOR			=	';'
-GENERATOR_FILENAME		=	'gli.cfg'
-INDEXER_FILENAME		=	'index.cfg'
-QP_FILENAME				=	'pc.cfg'
-SEARCH_ENGINE_FILENAME	=	'busca.cfg'
+GENERATOR_FILENAME		=	'config/gli.cfg'
+INDEXER_FILENAME		=	'config/index.cfg'
+QP_FILENAME				=	'config/pc.cfg'
+SEARCHER_FILENAME		=	'config/busca.cfg'
 
 CMD_LEIA				=	'LEIA'
 CMD_ESCREVA				=	'ESCREVA'
@@ -30,15 +30,15 @@ INSTRUCTION_ORDER_ERROR	=	'Instrução de leia após instrução de escreva, ' +
 NE_IO_INSTRUCTION_ERROR	=	'Instrução não existente ou ordem de leia e escreva invertidas, ' + LINE + '%d.'
 FILE_NOT_FOUND			=	'Arquivo não encontrado, nome: %s.'
 
-NAME_ILG_LOGGER			=	'inverted_list_generator_logger'
+NAME_IIG_LOGGER			=	'inverted_index_generator_logger'
 NAME_INDEXER_LOGGER		=	'indexer_logger'
 NAME_QP_LOGGER			=	'query_processor_logger'
-NAME_SE_LOGGER			=	'search_engine_logger'
+NAME_SEARCHER_LOGGER	=	'searcher_logger'
 
-IL_GENERATOR_LOG		=	'inverted_list_generator.log'
-INDEXER_LOG				=	'indexer.log'
-QUERY_PROCESSOR_LOG		=	'query_processor.log'
-SEARCH_ENGINE_LOG		=	'search_engine.log'
+II_GENERATOR_LOG		=	'logs/inverted_index_generator.log'
+INDEXER_LOG				=	'logs/indexer.log'
+QUERY_PROCESSOR_LOG		=	'logs/query_processor.log'
+SEARCHER_LOG			=	'logs/searcher.log'
 
 CONFIG_READ_HEADER		=	'Leitura do arquivo de configuração para geração da lista invertida'
 READ_CONFIG_STARTED		=	'Iniciando leitura do arquivo de configuração: %s.'
@@ -46,7 +46,7 @@ TUPLES_READED_FILE		=	'Lidas %d tuplas do arquivo: %s.'
 LINES_READED_USED_FILE	=	'Lidas %d linhas (%d aproveitadas) do arquivo: %s.'
 LINES_READED_FILE		=	'Lidas %d linhas do arquivo: %s.'
 GENERATING_INV_LIST		=	'Gerando a lista invertida com base nos dados lidos.'
-WRITING_INVERTED_LIST	=	'Escrevendo a lista invertida gerada em: %s.'
+WRITING_INVERTED_INDEX	=	'Escrevendo a lista invertida gerada em: %s.'
 CONFIG_END_PROCESSING	=	'Finzalizando a leitura do arquivo de configuração: %s.'
 LINES_READED_CONFIG		=	'Lidas %d linhas do arquivo de configuração.'
 NO_FILE_SPECIFIED		=	'Arquivo não especificado para geração da lista invertida.'
@@ -81,8 +81,6 @@ def setup_logger(name, filename):
 		logger.addHandler(console_handler)
 		logger.addHandler(file_handler)
 		
-		loggers.update(dict(name=logger))
-	
 	return logger
 	
 def get_values(line, count, separator, log_name, log_file):

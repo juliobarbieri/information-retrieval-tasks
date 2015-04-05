@@ -13,7 +13,7 @@ from xml.etree.ElementTree import ElementTree
 from nltk.stem.snowball import EnglishStemmer
 from math import log
 
-class Metric:
+class Engine:
 	
 	def __init__(self, vector_space_model):
 		self.vector_space_model = vector_space_model
@@ -48,9 +48,8 @@ class Metric:
 		return query_results
 	
 	def index(self):
-		relevances = []
 		for word in self.vector_space_model.name_cols:
-			weights = self.calc_relevance(word)
+			weights = self.calculate_weights(word)
 			index = self.vector_space_model.return_index_by_term(word)
 			for i in range(len(self.vector_space_model.return_term_column(word))):
 				self.vector_space_model.matriz_pesos[i][index] = weights[i]
@@ -64,10 +63,10 @@ class Metric:
 	
 		return words_array
 	
-	def calc_relevance(self, word):
+	def calculate_weights(self, word):
 		N = self.vector_space_model.qntd_documentos()
 		n = self.vector_space_model.qntd_documentos_dado_termo(word)
-		tf = self.vector_space_model.return_term_column(word) #/total_oc_termo
+		tf = self.vector_space_model.return_term_column(word)
 		return self.tf_idf(tf, max(tf), N, n)
 	
 	def tf_idf(self, tf, max_tf, total_documentos, n):

@@ -9,7 +9,7 @@ import nltk
 from collections import defaultdict
 from nltk.stem.snowball import EnglishStemmer
  
-class InvertedList:
+class InvertedIndex:
  
 	def __init__(self, tokenizer, stemmer=None, stopwords=None):
 		self.tokenizer = tokenizer

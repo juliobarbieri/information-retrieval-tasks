@@ -14,12 +14,12 @@ from util import exit_error
 from util import setup_logger
 from util import get_values
 from util import format_text
-from inverted_list import InvertedList
+from inverted_index import InvertedIndex
 from xml.etree.ElementTree import ElementTree
 from nltk.stem.snowball import EnglishStemmer
 
 def leia(filename, abstract_list):
-	logger = setup_logger(util.NAME_ILG_LOGGER, util.IL_GENERATOR_LOG)
+	logger = setup_logger(util.NAME_IIG_LOGGER, util.II_GENERATOR_LOG)
 	
 	if not file_exists(filename):
 		logger.error(util.FILE_NOT_FOUND % filename)
@@ -52,7 +52,7 @@ def leia(filename, abstract_list):
 	logger.debug(util.TUPLES_READED_FILE % (qntd_dados, filename))
 	
 def escreva(filename, abstract_list):
-	logger = setup_logger(util.NAME_ILG_LOGGER, util.IL_GENERATOR_LOG)
+	logger = setup_logger(util.NAME_IIG_LOGGER, util.II_GENERATOR_LOG)
 	
 	if filename == '':
 		logger.error(util.NO_FILE_SPECIFIED)
@@ -61,12 +61,12 @@ def escreva(filename, abstract_list):
 	logger.debug(util.GENERATING_INV_LIST)
 	
 	fw = open(filename, 'w') 
-	index = InvertedList(nltk.word_tokenize, EnglishStemmer(), nltk.corpus.stopwords.words('english'))
+	index = InvertedIndex(nltk.word_tokenize, EnglishStemmer(), nltk.corpus.stopwords.words('english'))
 	
 	for key in abstract_list:
 		index.add(key, abstract_list[key])
 	
-	logger.debug(util.WRITING_INVERTED_LIST % filename)
+	logger.debug(util.WRITING_INVERTED_INDEX % filename)
 	
 	for id in index.index:
 		fw.write(index.retrieve(id) + '\n')
@@ -74,24 +74,24 @@ def escreva(filename, abstract_list):
 	fw.close()
 	
 def parse_command_file():
-	logger =  setup_logger(util.NAME_ILG_LOGGER, util.IL_GENERATOR_LOG)
+	logger =  setup_logger(util.NAME_IIG_LOGGER, util.II_GENERATOR_LOG)
 	
 	abstract_list = {}
 	
 	read = False
 	write = False
-	fname = util.GENERATOR_FILENAME
+	config_file = util.GENERATOR_FILENAME
 	
-	if not file_exists(fname):
-		logger.error(util.FILE_NOT_FOUND % fname)
+	if not file_exists(config_file):
+		logger.error(util.FILE_NOT_FOUND % config_file)
 		exit_error(util.EXITED_WITH_ERROR)
 	
-	logger.debug(util.READ_CONFIG_STARTED % fname)
+	logger.debug(util.READ_CONFIG_STARTED % config_file)
 	
-	with open(fname) as fp:
+	with open(config_file) as fp:
 		count = 0
 		for line in fp:
-			next_cmd, filename = get_values(line, count, util.CONFIG_SEPARATOR, util.NAME_ILG_LOGGER, util.IL_GENERATOR_LOG)
+			next_cmd, filename = get_values(line, count, util.CONFIG_SEPARATOR, util.NAME_IIG_LOGGER, util.II_GENERATOR_LOG)
 			
 			if write == True:
 				logger.error(util.INSTRUCTION_ORDER_ERROR % (count + 1))
@@ -109,7 +109,7 @@ def parse_command_file():
 			count = count + 1
 			
 	logger.debug(util.LINES_READED_CONFIG % count)
-	logger.debug(util.CONFIG_END_PROCESSING % fname)
+	logger.debug(util.CONFIG_END_PROCESSING % config_file)
 
 if __name__ == "__main__":
 	parse_command_file()

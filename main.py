@@ -5,13 +5,13 @@ Created on Sat Apr 4 2015
 @author: Julio Barbieri
 """
 
-import inverted_list_generator
+import inverted_index_generator
 import indexer
 import query_processor
-import search_engine
+import searcher
 
 if __name__ == "__main__":
-	inverted_list_generator.parse_command_file()
+	inverted_index_generator.parse_command_file()
 	indexer.parse_command_file()
 	query_processor.parse_command_file()
-	search_engine.parse_command_file()
+	searcher.parse_command_file()

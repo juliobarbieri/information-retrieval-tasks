@@ -12,7 +12,6 @@ from util import file_exists
 from util import exit_error
 from util import setup_logger
 from util import get_values
-from inverted_list import InvertedList
 from xml.etree.ElementTree import ElementTree
 from nltk.stem.snowball import EnglishStemmer
 
@@ -90,15 +89,15 @@ def parse_command_file():
 	
 	query = False
 	results = False
-	fname = util.QP_FILENAME
+	config_file = util.QP_FILENAME
 	
-	if not file_exists(fname):
-		logger.error(util.FILE_NOT_FOUND % fname)
+	if not file_exists(config_file):
+		logger.error(util.FILE_NOT_FOUND % config_file)
 		exit_error(util.EXITED_WITH_ERROR)
 	
-	logger.debug(util.READ_CONFIG_STARTED % fname)
+	logger.debug(util.READ_CONFIG_STARTED % config_file)
 	
-	with open(fname) as fp:
+	with open(config_file) as fp:
 		count = 0
 		for line in fp:
 			next_cmd, filename = get_values(line, count, util.CONFIG_SEPARATOR, util.NAME_QP_LOGGER, util.QUERY_PROCESSOR_LOG)
@@ -121,7 +120,7 @@ def parse_command_file():
 			count = count + 1
 			
 	logger.debug(util.LINES_READED_CONFIG % count)
-	logger.debug(util.CONFIG_END_PROCESSING % fname)
+	logger.debug(util.CONFIG_END_PROCESSING % config_file)
 
 if __name__ == "__main__":
 	parse_command_file()
