@@ -12,6 +12,7 @@ import re
 import pickle
 import util
 import time
+from tfidf import TfIdf
 from util import file_exists
 from util import exit_error
 from util import setup_logger
@@ -58,7 +59,7 @@ def leia(filename):
 	struct = VectorSpaceModel(list(set(unique_ids)), unique_terms)
 	struct.setup_matrix(indexes)
 	
-	engine = Engine(struct)
+	engine = Engine(TfIdf(), struct)
 	struct = engine.index()
 	
 	logger.debug(util.INDEX_TIME % (time.time() - start_time))

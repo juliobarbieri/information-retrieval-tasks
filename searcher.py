@@ -12,6 +12,7 @@ import pickle
 import time
 import re
 import util
+from tfidf import TfIdf
 from util import file_exists
 from util import exit_error
 from util import setup_logger
@@ -60,7 +61,7 @@ def consultas(filename, struct):
 	
 	start_time = time.time()
 	
-	engine = Engine(struct)
+	engine = Engine(TfIdf(), struct)
 	query_results = engine.search(query_list)
 	
 	logger.debug(util.QUERIES_TIME % (time.time() - start_time))
