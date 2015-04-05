@@ -62,7 +62,7 @@ def consultas(filename, struct):
 	start_time = time.time()
 	
 	metric = Metric(struct)
-	query_results = metric.prepare_data(query_list)
+	query_results = metric.search(query_list)
 	
 	logger.debug(util.QUERIES_TIME % (time.time() - start_time))
 	
@@ -81,13 +81,8 @@ def resultados(filename, query_results):
 	
 	for key in query_results:
 		fw.write(str(key) + ';' + str(query_results[key]) + '\n')
-	
-def format_text(text):
-	chars_to_remove = ['.', ',', '!', '?', ';', ':', '(', ')', '\n']
-	sc = set(chars_to_remove)
-	text = ''.join([c for c in text if c not in sc])
-
-	return text.upper()
+		
+	fw.close()
 	
 def parse_command_file():
 	logger =  setup_logger(util.NAME_SE_LOGGER, util.SEARCH_ENGINE_LOG)
@@ -129,4 +124,5 @@ def parse_command_file():
 	logger.debug(util.LINES_READED_CONFIG % count)
 	logger.debug(util.CONFIG_END_PROCESSING % fname)
 
-parse_command_file()
+if __name__ == "__main__":
+	parse_command_file()

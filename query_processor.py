@@ -46,7 +46,7 @@ def leia(filename, query_list, query_results):
 		
 		qntd_dados = qntd_dados + 1
 		query_results[key] = itens
-		query_list[key] = format_text(text)
+		query_list[key] = util.format_text(text)
 	
 	logger.debug(util.TUPLES_READED_FILE % (qntd_dados, filename))
 	
@@ -62,7 +62,9 @@ def consultas(filename, query_list):
 	fw = open(filename, 'w') 
 	
 	for key in query_list:
-		fw.write(key + ';' + query_list[key] + '\n')
+		fw.write(key + util.CSV_SEPARATOR + query_list[key] + '\n')
+		
+	fw.close()
 	
 def resultados(filename, query_results):
 	logger = setup_logger(util.NAME_QP_LOGGER, util.QUERY_PROCESSOR_LOG)
@@ -76,14 +78,9 @@ def resultados(filename, query_results):
 	fw = open(filename, 'w') 
 	
 	for key in query_results:
-		fw.write(key + ';' + str(query_results[key]) + '\n')
-	
-def format_text(text):
-	chars_to_remove = ['.', ',', '!', '?', ';', ':', '(', ')', '\n']
-	sc = set(chars_to_remove)
-	text = ''.join([c for c in text if c not in sc])
-
-	return text.upper()
+		fw.write(key + util.CSV_SEPARATOR + str(query_results[key]) + '\n')
+		
+	fw.close()
 	
 def parse_command_file():
 	logger =  setup_logger(util.NAME_QP_LOGGER, util.QUERY_PROCESSOR_LOG)
@@ -126,4 +123,5 @@ def parse_command_file():
 	logger.debug(util.LINES_READED_CONFIG % count)
 	logger.debug(util.CONFIG_END_PROCESSING % fname)
 
-parse_command_file()
+if __name__ == "__main__":
+	parse_command_file()

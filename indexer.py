@@ -11,10 +11,12 @@ import logging
 import re
 import pickle
 import util
+import time
 from util import file_exists
 from util import exit_error
 from util import setup_logger
 from util import get_values
+from metric import Metric
 from inverted_list import InvertedList
 from vector_space_model import VectorSpaceModel
 from xml.etree.ElementTree import ElementTree
@@ -52,8 +54,15 @@ def leia(filename):
 		unique_ids.extend(indexes[i])
 		unique_terms.append(i)
 	
+	start_time = time.time()
+	
 	struct = VectorSpaceModel(list(set(unique_ids)), unique_terms)
 	struct.setup_matrix(indexes)
+	
+	metric = Metric(struct)
+	struct = metric.index()
+	
+	logger.debug(util.INDEX_TIME % (time.time() - start_time))
 	
 	return struct
 	
@@ -124,4 +133,5 @@ def parse_command_file():
 	logger.debug(util.LINES_READED_CONFIG % count)
 	logger.debug(util.CONFIG_END_PROCESSING % fname)
 
-parse_command_file()
+if __name__ == "__main__":
+	parse_command_file()

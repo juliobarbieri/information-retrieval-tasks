@@ -8,10 +8,12 @@ Created on Tue Mar 24 2015
 import nltk
 import logging
 import util
+import time
 from util import file_exists
 from util import exit_error
 from util import setup_logger
 from util import get_values
+from util import format_text
 from inverted_list import InvertedList
 from xml.etree.ElementTree import ElementTree
 from nltk.stem.snowball import EnglishStemmer
@@ -43,7 +45,7 @@ def leia(filename, abstract_list):
 				text = extract.text
 			
 		qntd_dados = qntd_dados + 1
-		abstract_list[key] = format_text(text)
+		abstract_list[key] = util.format_text(text)
 	
 	logger.debug(util.DOCUMENTS_TIME % (time.time() - start_time))
 	
@@ -69,12 +71,7 @@ def escreva(filename, abstract_list):
 	for id in index.index:
 		fw.write(index.retrieve(id) + '\n')
 	
-def format_text(text):
-	chars_to_remove = ['.', ',', '!', '?', ';', ':', '(', ')', '\n']
-	sc = set(chars_to_remove)
-	text = ''.join([c for c in text if c not in sc])
-
-	return text.upper()
+	fw.close()
 	
 def parse_command_file():
 	logger =  setup_logger(util.NAME_ILG_LOGGER, util.IL_GENERATOR_LOG)
@@ -114,4 +111,5 @@ def parse_command_file():
 	logger.debug(util.LINES_READED_CONFIG % count)
 	logger.debug(util.CONFIG_END_PROCESSING % fname)
 
-parse_command_file()
+if __name__ == "__main__":
+	parse_command_file()

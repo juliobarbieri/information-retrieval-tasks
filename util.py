@@ -9,8 +9,6 @@ import logging
 import sys
 import os.path
 
-loggers = {}
-
 CONFIG_SEPARATOR		=	'='
 CSV_SEPARATOR			=	';'
 GENERATOR_FILENAME		=	'gli.cfg'
@@ -61,13 +59,12 @@ READING_QUERIES			=	'Leando as consultas no arquivo: %s.'
 QUERIES_TIME			=	'As consultas requeridas foram processadas e realizadas em %s segundos'
 DOCUMENTS_TIME			=	'Os documentos requeridos foram lidos e processados em %s segundos'
 WORDS_TIME				=	'As palavras requeridas foram lidas e processadas em %s segundos'
+INDEX_TIME				=	'Os documentos foram indexados em %s segundos'
 
 def setup_logger(name, filename):
-	global loggers
-
-	if loggers.get(name):
-		return loggers.get(name)
-	else:
+	logger = logging.getLogger(name)
+	
+	if not len(logger.handlers):
 		logger = logging.getLogger(name)
 		logger.setLevel(logging.DEBUG)
 	
@@ -86,7 +83,7 @@ def setup_logger(name, filename):
 		
 		loggers.update(dict(name=logger))
 	
-		return logger
+	return logger
 	
 def get_values(line, count, separator, log_name, log_file):
 	logger =  setup_logger(log_name, log_file)
@@ -103,6 +100,13 @@ def get_values(line, count, separator, log_name, log_file):
 		filename = filename[:-1]
 	
 	return (next_cmd, filename)
+
+def format_text(text):
+	chars_to_remove = ['.', ',', '!', '?', ';', ':', '(', ')', '\n']
+	sc = set(chars_to_remove)
+	text = ''.join([c for c in text if c not in sc])
+
+	return text.upper()
 
 def exit_error(message):
 	sys.exit(message)

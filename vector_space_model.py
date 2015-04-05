@@ -14,6 +14,7 @@ class VectorSpaceModel:
 		self.name_cols = terms
 		
 		self.termo_documento = np.zeros((len(documents), len(terms)))
+		self.matriz_pesos = np.zeros((len(documents), len(terms)))
 	
 	def setup_matrix(self, indexes):
 		for j in range(len(self.name_cols)):
@@ -53,6 +54,17 @@ class VectorSpaceModel:
 				quantidade = qntd_documento + 1
 					
 			return quantidade
+			
+	def termos_totais_documento(self):
+		cos_td = np.zeros((len(documents), len(terms)))
+		for i in range(len(self.name_rows)):
+			total_terms = 0
+			for j in range(len(self.name_cols)):
+				total_terms = total_terms + self.name_cols
+				
+			for j in range(len(self.name_cols)):
+				cos_td[i][j] = (self.name_cols[j]*100)/total_terms
+		return cos_td
 	
 	def return_index_by_term(self, term):
 		for i in range(len(self.name_cols)):
@@ -66,3 +78,10 @@ class VectorSpaceModel:
 			return None
 		else:
 			return self.termo_documento[:,index]
+			
+	def return_term_weights_column(self, term):
+		index = self.return_index_by_term(term)
+		if index == -1:
+			return None
+		else:
+			return self.matriz_pesos[:,index]
