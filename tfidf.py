@@ -21,8 +21,14 @@ class TfIdf:
 		return weights
 	
 	def term_frquency(self, tf, max_tf):
-		#return 0.5 + ((0.5 * tf)/max_tf)
 		return tf/max_tf
+		#return 0.5 + ((0.5 * tf)/max_tf)
+		#if tf != 0:
+		#	return 1 + log(tf, 10)
+		#else:
+		#	return 0
 	
 	def idf(self, total_documentos, n):
 		return log(total_documentos/n)
+		#return log(total_documentos/n, 10)
+		
