@@ -17,6 +17,7 @@ from util import file_exists
 from util import exit_error
 from util import setup_logger
 from util import get_values
+from util import valida_termo
 from engine import Engine
 from vector_space_model import VectorSpaceModel
 from xml.etree.ElementTree import ElementTree
@@ -96,12 +97,6 @@ def trata_lista(line):
 		return (termo, vet_docs)
 	else:
 		return None, None
-
-def valida_termo(termo):
-	if len(termo) > 1 and re.match("^[A-Z]*$", termo):
-		return termo
-	else:
-		return None
 	
 def parse_command_file():
 	logger =  setup_logger(util.NAME_INDEXER_LOGGER, util.INDEXER_LOG)

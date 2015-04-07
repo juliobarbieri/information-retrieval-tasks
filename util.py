@@ -7,7 +7,10 @@ Created on Tue Mar 24 2015
 
 import logging
 import sys
+import re
 import os.path
+
+from nltk.stem.snowball import EnglishStemmer
 
 CONFIG_SEPARATOR		=	'='
 CSV_SEPARATOR			=	';'
@@ -21,6 +24,9 @@ CMD_ESCREVA				=	'ESCREVA'
 CMD_CONSULTAS			=	'CONSULTAS'
 CMD_RESULTADOS			=	'RESULTADOS'
 CMD_MODELO				=	'MODELO'
+
+STEMMER					=	'STEMMER'
+NOSTEMMER				=	'NOSTEMMER'
 
 LINE					=	'linha '
 EXITED_WITH_ERROR		=	'Programa encerrado com erros, verificar o log de execução.'
@@ -56,6 +62,8 @@ WRITING_QUERIES			=	'Escrevendo as consultas no arquivo: %s.'
 WRITING_EXPECTED_RESULTS=	'Escrevendo os resultados esperados das consultas no arquivo: %s.'
 WRITING_RESULTS			=	'Escrevendo os resultados das consultas no arquivo: %s.'
 READING_QUERIES			=	'Leando as consultas no arquivo: %s.'
+STEMMER_ENABLED			=	'Uso de stemmer ativado.'
+STEMMER_DISABLED		=	'Uso de stemmer desativado.'
 QUERIES_TIME			=	'As consultas requeridas foram processadas e realizadas em %s segundos'
 DOCUMENTS_TIME			=	'Os documentos requeridos foram lidos e processados em %s segundos'
 WORDS_TIME				=	'As palavras requeridas foram lidas e processadas em %s segundos'
@@ -82,6 +90,22 @@ def setup_logger(name, filename):
 		logger.addHandler(file_handler)
 		
 	return logger
+
+def verify_stemmer(line, count, log_name, log_file):
+	logger =  setup_logger(log_name, log_file)
+	
+	if line.endswith('\n'):
+		line = line[:-1]
+	
+	if line == STEMMER:
+		logger.debug(STEMMER_ENABLED)
+		return EnglishStemmer()
+	elif line == NOSTEMMER:
+		logger.debug(STEMMER_DISABLED)
+		return None
+	else:
+		logger.error(NE_INSTRUCTION_ERROR + str(count + 1))
+		exit_error(EXITED_WITH_ERROR)
 	
 def get_values(line, count, separator, log_name, log_file):
 	logger =  setup_logger(log_name, log_file)
@@ -98,6 +122,12 @@ def get_values(line, count, separator, log_name, log_file):
 		filename = filename[:-1]
 	
 	return (next_cmd, filename)
+	
+def valida_termo(termo):
+	if len(termo) > 1 and re.match("^[A-Z]*$", termo):
+		return termo
+	else:
+		return None
 
 def format_text(text):
 	chars_to_remove = ['.', ',', '!', '?', ';', ':', '(', ')', '\n']

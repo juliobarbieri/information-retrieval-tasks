@@ -10,7 +10,6 @@ import numpy as np
 import nltk
 from vector_space_model import VectorSpaceModel
 from xml.etree.ElementTree import ElementTree
-from nltk.stem.snowball import EnglishStemmer
 
 class Engine:
 	
@@ -22,8 +21,7 @@ class Engine:
 		query_results = {}
 		stopwords = nltk.corpus.stopwords.words('english')
 		for key in query_list:
-			query = query_list[key]
-			words_array = self.pre_process(query)
+			words_array = query_list[key]
 			relevances = []
 			for word in words_array:
 				if word in stopwords or word not in self.vector_space_model.name_cols:
@@ -56,10 +54,3 @@ class Engine:
 				self.vector_space_model.matriz_pesos[i][index] = weights[i]
 		
 		return self.vector_space_model
-	
-	def pre_process(self, query):
-		query = query.replace('/', ' ')
-		query = re.sub(' +',' ',query)
-		words_array = query.split(' ')
-	
-		return words_array

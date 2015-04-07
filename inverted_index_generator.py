@@ -13,10 +13,13 @@ from util import file_exists
 from util import exit_error
 from util import setup_logger
 from util import get_values
+from util import verify_stemmer
 from util import format_text
 from inverted_index import InvertedIndex
 from xml.etree.ElementTree import ElementTree
 from nltk.stem.snowball import EnglishStemmer
+
+stemmer = None
 
 def leia(filename, abstract_list):
 	logger = setup_logger(util.NAME_IIG_LOGGER, util.II_GENERATOR_LOG)
@@ -61,7 +64,7 @@ def escreva(filename, abstract_list):
 	logger.debug(util.GENERATING_INV_LIST)
 	
 	fw = open(filename, 'w') 
-	index = InvertedIndex(nltk.word_tokenize, EnglishStemmer(), nltk.corpus.stopwords.words('english'))
+	index = InvertedIndex(nltk.word_tokenize, stemmer, nltk.corpus.stopwords.words('english'))
 	
 	for key in abstract_list:
 		index.add(key, abstract_list[key])
@@ -91,6 +94,12 @@ def parse_command_file():
 	with open(config_file) as fp:
 		count = 0
 		for line in fp:
+			if count == 0:
+				global stemmer
+				stemmer = verify_stemmer(line, count, util.NAME_IIG_LOGGER, util.II_GENERATOR_LOG)
+				count = count + 1
+				continue
+			
 			next_cmd, filename = get_values(line, count, util.CONFIG_SEPARATOR, util.NAME_IIG_LOGGER, util.II_GENERATOR_LOG)
 			
 			if write == True:

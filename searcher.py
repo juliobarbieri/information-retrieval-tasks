@@ -16,12 +16,16 @@ from tfidf import TfIdf
 from util import file_exists
 from util import exit_error
 from util import setup_logger
+from util import verify_stemmer
 from util import get_values
+from util import valida_termo
 from engine import Engine
 from vector_space_model import VectorSpaceModel
 from xml.etree.ElementTree import ElementTree
 from nltk.stem.snowball import EnglishStemmer
 from math import log
+
+stemmer = None
 
 def modelo(filename):
 	logger = setup_logger(util.NAME_SEARCHER_LOGGER, util.SEARCHER_LOG)
@@ -53,7 +57,7 @@ def consultas(filename, struct):
 	with open(filename) as fp:
 		count = 0
 		for line in fp:
-			key, query = get_values(line, count, util.CSV_SEPARATOR, util.NAME_SEARCHER_LOGGER, util.SEARCHER_LOG)
+			key, query = trata_query(line)
 			query_list[key] = query
 			count = count + 1
 			
@@ -84,6 +88,27 @@ def resultados(filename, query_results):
 		
 	fw.close()
 	
+def trata_query(line):
+
+	line = line[:-1]
+	vet_line = line.split(util.CSV_SEPARATOR)
+	
+	identifier = vet_line[0]
+	query = vet_line[1]
+	
+	query = query.replace('/', ' ')
+	query = re.sub(' +',' ',query)
+	words_array = query.split(' ')
+	
+	for word in words_array:
+		if valida_termo(word) == None:
+			words_array.remove(word)
+	
+	if stemmer:
+		words_array = [stemmer.stem(word).upper() for word in words_array]
+	
+	return (identifier, words_array)
+	
 def parse_command_file():
 	logger =  setup_logger(util.NAME_SEARCHER_LOGGER, util.SEARCHER_LOG)
 	
@@ -105,6 +130,12 @@ def parse_command_file():
 	with open(config_file) as fp:
 		count = 0
 		for line in fp:
+			if count == 0:
+				global stemmer
+				stemmer = verify_stemmer(line, count, util.NAME_IIG_LOGGER, util.II_GENERATOR_LOG)
+				count = count + 1
+				continue
+			
 			next_cmd, filename = get_values(line, count, util.CONFIG_SEPARATOR, util.NAME_SEARCHER_LOGGER, util.SEARCHER_LOG)
 			
 			if next_cmd == util.CMD_MODELO and results == False:
