@@ -37,13 +37,16 @@ def leia(filename, query_list, query_results):
 			text = query_text.text
 			
 		for j, records in enumerate(query.findall('Records')):
-			itens = {}
+			itens = []
 			for k, item in enumerate(records.findall('Item')):
 				score = item.get('score')
 				document = item.text
-				itens[int(document)] = int(score)
+				itens.append([int(document), sum(map(int, score))])
+				#itens[int(document)] = int(score)
 		
 		qntd_dados = qntd_dados + 1
+		itens = sorted(itens, key=lambda x: x[1], reverse=True)
+		itens = [[x + 1] + itens[x] for x in range(len(itens))]
 		query_results[key] = itens
 		query_list[key] = util.format_text(text)
 	
