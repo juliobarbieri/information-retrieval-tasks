@@ -13,7 +13,6 @@ from util import exit_error
 from util import setup_logger
 from util import get_values
 from xml.etree.ElementTree import ElementTree
-from nltk.stem.snowball import EnglishStemmer
 
 def leia(filename, query_list, query_results):
 	logger = setup_logger(util.NAME_QP_LOGGER, util.QUERY_PROCESSOR_LOG)

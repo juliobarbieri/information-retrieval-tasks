@@ -10,7 +10,7 @@ import sys
 import re
 import os.path
 
-from nltk.stem.snowball import EnglishStemmer
+from nltk.stem.porter import PorterStemmer
 
 CONFIG_SEPARATOR		=	'='
 CSV_SEPARATOR			=	';'
@@ -20,6 +20,8 @@ QP_FILENAME				=	'config/pc.cfg'
 SEARCHER_FILENAME		=	'config/busca.cfg'
 
 EVALUATION_FILENAME		=	'config/avaliacao.cfg'
+
+PATH 					=	'files/'
 
 CMD_LEIA				=	'LEIA'
 CMD_ESCREVA				=	'ESCREVA'
@@ -63,6 +65,8 @@ NO_FILE_SPECIFIED		=	'Arquivo não especificado para geração da lista invertid
 SAVING_STRUCTURE		=	'Salvando estrutura do modelo vetorial no arquivo: %s.'
 STRUCTURE_LOADED		=	'Estrutura carregada à partir do arquivo: %s.'
 WRITING_QUERIES			=	'Escrevendo as consultas no arquivo: %s.'
+WRITING_METRIC			=	'Escrevendo a métrica no arquivo: %s.'
+PLOTTING_METRIC			=	'Plotando a métrica em um gráfico: %s.'
 WRITING_EXPECTED_RESULTS=	'Escrevendo os resultados esperados das consultas no arquivo: %s.'
 WRITING_RESULTS			=	'Escrevendo os resultados das consultas no arquivo: %s.'
 READING_QUERIES			=	'Leando as consultas no arquivo: %s.'
@@ -105,7 +109,7 @@ def verify_stemmer(line, count, log_name, log_file):
 	
 	if line == STEMMER:
 		logger.debug(STEMMER_ENABLED)
-		return EnglishStemmer()
+		return PorterStemmer()
 	elif line == NOSTEMMER:
 		logger.debug(STEMMER_DISABLED)
 		return None

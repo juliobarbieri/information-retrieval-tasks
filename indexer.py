@@ -21,7 +21,6 @@ from util import valida_termo
 from engine import Engine
 from vector_space_model import VectorSpaceModel
 from xml.etree.ElementTree import ElementTree
-from nltk.stem.snowball import EnglishStemmer
 
 def leia(filename):
 	logger =  setup_logger(util.NAME_INDEXER_LOGGER, util.INDEXER_LOG)

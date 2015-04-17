@@ -17,7 +17,7 @@ from util import verify_stemmer
 from util import format_text
 from inverted_index import InvertedIndex
 from xml.etree.ElementTree import ElementTree
-from nltk.stem.snowball import EnglishStemmer
+from nltk.stem.porter import PorterStemmer
 
 stemmer = None
 

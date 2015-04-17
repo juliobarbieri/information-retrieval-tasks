@@ -12,6 +12,8 @@ import re
 import pickle
 import util
 import time
+import collections
+import matplotlib.pyplot as plt
 from util import file_exists
 from util import exit_error
 from util import setup_logger
@@ -19,6 +21,8 @@ from util import get_values
 from util import verify_stemmer
 from math import log
 
+stemmer = util.NOSTEMMER
+sequence = 1
 
 def leia(filename):
 	logger =  setup_logger(util.NAME_EVALUATION_LOGGER, util.EVALUATION_LOG)
@@ -51,66 +55,117 @@ def do_measures(results):
 	retrieved_results = results[1]
 	expected_results = results[0]
 	
-	precisions = precision(retrieved_results)
-	recalls = recall(retrieved_results, expected_results)
+	precisions = precision_for_all(retrieved_results)
+	recalls = recall_for_all(retrieved_results, expected_results)
 	
-	precisions_retrieved = precision_at_10(retrieved_results)
-	precisions_expected = precision_at_10(expected_results)
+	precisions_retrieved = precision_for_all(retrieved_results, 10)
+	precisions_expected = precision_for_all(expected_results, 10)
+	
 	MAP = mean_average_precision(precisions_retrieved, precisions_expected)
 	f1_scores = f1_score(precisions, recalls)
 	dcg = discounted_cumulative_gain(retrieved_results)
 	ndcg = normalized_discounted_cumulative_gain(retrieved_results)
+	eleven_points = grafico_precisao_11_niveis_recall(retrieved_results, expected_results)
+	
+	save_in_file(precisions_retrieved, util.PATH + 'precision10K-' + stemmer + '-' + str(sequence) + '.csv')
+	save_in_file(MAP, util.PATH + 'map-' + stemmer + '-' + str(sequence) + '.csv')
+	save_in_file(f1_scores, util.PATH + 'f1-' + stemmer + '-' + str(sequence) + '.csv')
+	save_in_file(dcg, util.PATH + 'discounted_cumulative_gain-' + stemmer + '-' + str(sequence) + '.csv')
+	save_in_file(ndcg, util.PATH + 'normalized_discounted_cumulative_gain-' + stemmer + '-' + str(sequence) + '.csv')
+	
+	save_and_plot_in_file(eleven_points, util.PATH + '11points-' + stemmer + '-' + str(sequence))
 
-def grafico_precisao_11_niveis_recall(results, precisions, recalls):
-	'''TODO'''
+def save_in_file(measures, filename):
+	logger = setup_logger(util.NAME_EVALUATION_LOGGER, util.EVALUATION_LOG)
 	
-def precision_at_10(results):
-	K = 10
+	if filename == '':
+		logger.error(util.NO_FILE_SPECIFIED)
+		exit_error(util.EXITED_WITH_ERROR)
+	
+	logger.debug(util.WRITING_METRIC % filename)
+	
+	fw = open(filename, 'w') 
+	
+	if isinstance(measures, collections.Sequence):
+		for pair in measures:
+			fw.write(str(pair[0]) + util.CSV_SEPARATOR + str(pair[1]) + '\n')
+			
+	else:
+		fw.write(str(measures))
+		
+	fw.close()
+
+def save_and_plot_in_file(measures, filename):
+	logger = setup_logger(util.NAME_EVALUATION_LOGGER, util.EVALUATION_LOG)
+	
+	if filename == '':
+		logger.error(util.NO_FILE_SPECIFIED)
+		exit_error(util.EXITED_WITH_ERROR)
+	
+	logger.debug(util.WRITING_METRIC % (filename + '.pdf'))
+	
+	recalls = np.array([0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
+	plt.plot(recalls, measures, 'b-')
+	plt.ylabel('Precision')
+	plt.xlabel('Recall')
+	plt.savefig(filename + '.pdf')
+	
+	logger.debug(util.WRITING_METRIC % (filename + '.csv'))
+	
+	fw = open(filename + '.csv', 'w') 
+	
+	for precision, recall in zip(measures, recalls):
+		fw.write(str(precision) + util.CSV_SEPARATOR + str(recall) + '\n')
+		
+	fw.close()
+
+def grafico_precisao_11_niveis_recall( retrieved_results, expected_results):
+	points = 11
+	
+	mean_precisions = []
+	mean_recalls = []
+	
+	for i in range(len(expected_results)):
+		precisions = precision_for_all(retrieved_results, i + 1)
+		recalls = recall_for_all(retrieved_results, expected_results, i + 1)
+		mean_precision = np.mean([precision[1] for precision in precisions])
+		mean_recall = np.mean([recall[1] for recall in recalls])
+		
+		mean_precisions.append(mean_precision)
+		mean_recalls.append(mean_recall)
+		#print('Precision: ' + str(mean_precision))
+		#print('Recall: ' + str(mean_recall))
+		
+	#print(mean_precisions)
+	#print(mean_recalls)
+	precision_recalls = np.zeros(points)
+		
+	for i in range(0,points):
+		precision_at_k = 0
+		for k in range(len(mean_recalls)):
+			if i <= mean_recalls[k]*10:
+				precision_at_k = max(precision_at_k, mean_precisions[k])
+		precision_recalls[i] = precision_at_k
+		
+	return precision_recalls
+	
+def precision_for_all(results, K = -1):
 	
 	precisions = []
 	
 	for key in results:
 		rank = results[key]
-		i = 0
-		relevant = 0
-		for d in rank:
-			if d[2] == 1:
-				relevant = relevant + 1
-			if i == K - 1:
-				break
-			i = i + 1
-				
-		precision = relevant/K
-		precisions.append([key, precision])
+		
+		if K == -1:
+			precision = precision_at_k(rank, len(rank))
+		else:
+			precision = precision_at_k(rank, K)
+		
+		precisions.append([key, round(precision, 2)])
 		
 	return precisions
 	
-def precision(results):
-	#				Relevant	Nonrelevant
-	# Retrieved		tp			fp
-	# Nonretrieved	fn			tn
-	
-	#P = tp/(tp + fp)
-	#P = relevant_retrieved/(relevant_retrieved + nonrelevant_retrieved)
-	
-	precisions = []
-	
-	for key in results:
-		rank = results[key]
-		relevant = 0
-		nonrelevant = 0
-		for d in rank:
-			if d[2] == 1:
-				relevant = relevant + 1
-			else:
-				nonrelevant = nonrelevant + 1
-				
-		precision = relevant/(relevant + nonrelevant)
-		precisions.append([key, precision])
-		
-	return precisions
-	
-def recall(retrieved, expected):
+def recall_for_all(retrieved, expected, K = -1):
 	#				Relevant	Nonrelevant
 	# Retrieved		tp			fp
 	# Nonretrieved	fn			tn
@@ -122,29 +177,58 @@ def recall(retrieved, expected):
 		
 	for key_expected, key_retrieved in zip(expected, retrieved):
 		if key_expected == key_retrieved:
-			data_expected = expected[key_expected]
-			data_retrieved = expected[key_retrieved]
-			
+		
+			relevants_nonretrieved = nonretrieved(expected[key_expected], retrieved[key_retrieved])
 			rank = retrieved[key_retrieved]
-			relevant = 0
-			nonrelevant = 0
-			for d in rank:
-				if d[2] == 1:
-					relevant = relevant + 1
+			if K == -1:
+				recall = recall_at_k(rank, len(relevants_nonretrieved), len(rank))
+			else:
+				recall = recall_at_k(rank, len(relevants_nonretrieved), K)
 			
-			documents_retrieved = [element[1] for element in data_retrieved if element[2] == 1]
-			documents_expected = [element[1] for element in data_expected if element[2] == 1]
-			
-			relevants_nonretrieved = [x for x in documents_expected if x not in documents_retrieved]
-			
-			try:
-				recall = relevant/(relevant + len(relevants_nonretrieved))
-			except ZeroDivisionError:
-				recall = 0
-			
-			recalls.append([key_retrieved, recall])
+			recalls.append([key_retrieved, round(recall)])
 			
 	return recalls
+	
+def precision_at_k(results, K):
+	relevant = 0
+	i = 0
+	for result in results:
+		if result[2] == 1:
+			relevant = relevant + 1
+		if i == K - 1:
+			break
+		i = i + 1
+				
+	precision = relevant/K
+	#print(str(precision) + ' = ' + str(relevant) + '/' + str(K) )
+	return precision
+	
+def recall_at_k(results, relevants_nonretrieved, K):
+	relevant = 0
+	i = 0
+	for d in results:
+		if d[2] == 1:
+			relevant = relevant + 1
+		if i == K - 1:
+			break
+		i = i + 1
+	
+	try:
+		recall = relevant/(relevant + relevants_nonretrieved)
+		#print(str(recall) + ' = ' + str(relevant) + '/' + str(relevant) + ' + ' + str(relevants_nonretrieved))
+	except ZeroDivisionError:
+		recall = 0
+		#print(str(recall) + ' = ' + str(relevant) + '/' + str(relevant) + ' + ' + str(relevants_nonretrieved))
+	return recall
+	
+def nonretrieved(data_expected, data_retrieved):
+	
+	documents_retrieved = [element[1] for element in data_retrieved if element[2] == 1]
+	documents_expected = [element[1] for element in data_expected if element[2] == 1]
+	
+	relevants_nonretrieved = [x for x in documents_expected if x not in documents_retrieved]
+	
+	return relevants_nonretrieved
 	
 def mean_average_precision(precisions_retrieved, precisions_expected):
 	all_precisions_retrieved =	[precision[1] for precision in precisions_retrieved]
@@ -191,7 +275,7 @@ def prepare_data(results):
 	for key_expected, key_retrieved in zip(expected, retrieved):
 		if key_expected == key_retrieved:
 			data_expected = expected[key_expected]
-			data_retrieved = expected[key_retrieved]
+			data_retrieved = retrieved[key_retrieved]
 			
 			documents_retrieved = [element[1] for element in data_retrieved]
 			documents_expected = [element[1] for element in data_expected if element[2] == 1]
@@ -259,14 +343,16 @@ def parse_command_file():
 		for line in fp:
 			if count == 0:
 				global stemmer
-				stemmer = verify_stemmer(line, count, util.NAME_EVALUATION_LOGGER, util.EVALUATION_LOG)
+				if verify_stemmer(line, count, util.NAME_EVALUATION_LOGGER, util.EVALUATION_LOG):
+					stemmer = util.STEMMER
 				count = count + 1
 				continue
 			
 			next_cmd, filename = get_values(line, count, util.CONFIG_SEPARATOR, util.NAME_EVALUATION_LOGGER, util.EVALUATION_LOG)
 			
 			if next_cmd == util.CMD_LEIA and (count == 1 or count == 2):
-				results.append(leia(filename))
+				returned_results = leia(filename)
+				results.append(returned_results)
 				
 			else:
 				logger.error(util.NE_IO_INSTRUCTION_ERROR % (count + 1))

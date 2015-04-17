@@ -22,7 +22,7 @@ from util import valida_termo
 from engine import Engine
 from vector_space_model import VectorSpaceModel
 from xml.etree.ElementTree import ElementTree
-from nltk.stem.snowball import EnglishStemmer
+from nltk.stem.porter import PorterStemmer
 from math import log
 
 stemmer = None

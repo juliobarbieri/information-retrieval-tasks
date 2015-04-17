@@ -7,7 +7,7 @@ Created on Sat Mar 28 2015
 
 import nltk
 from collections import defaultdict
-from nltk.stem.snowball import EnglishStemmer
+from nltk.stem.porter import PorterStemmer
  
 class InvertedIndex:
  
@@ -27,7 +27,7 @@ class InvertedIndex:
 		return word + ';' + str([id for id in self.index.get(word)]).replace(' ', '').replace('\'', '')
  
 	def add(self, identifier, document):
-		for token in [t.lower() for t in nltk.word_tokenize(document)]:
+		for token in [t.lower() for t in self.tokenizer(document)]:
 			if token in self.stopwords:
 				continue
  
