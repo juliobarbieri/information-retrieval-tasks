@@ -32,8 +32,14 @@ class Engine:
 				if len(relevances) == 0:
 					relevances = relevance
 				else:
-					relevances = [1/(x + y) for x, y in zip(relevance, relevances)]
-					
+					#print('Com IF: ' + str(len([1/(x + y) if x != 0 and y != 0 else y for x, y in zip(relevance, relevances)])))
+					#print('Sem IF: ' + str(len([1/(x + y) for x, y in zip(relevance, relevances)])))
+					#for x, y in zip(relevance, relevances):
+					#	if x != 0 or y != 0:
+					#		print(str(1) + '/' + '(' + str(x) + '+' + str(y) + ')' + ' = ' + str(1/(x + y)))
+					#	else:
+					#		print(str(1) + '/' + '(' + str(x) + ')' + ' = ' + str(1/(x)))
+					relevances = [1/(x + y) if x != 0 or y != 0 else y for x, y in zip(relevance, relevances)]
 			relevances_documents = []
 			
 			for element_key, element in zip(self.vector_space_model.name_rows, relevances):

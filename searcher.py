@@ -98,7 +98,7 @@ def trata_query(line):
 	
 	query = query.replace('/', ' ')
 	query = re.sub(' +',' ',query)
-	words_array = query.split(' ')
+	words_array = nltk.word_tokenize(query)
 	
 	for word in words_array:
 		if valida_termo(word) == None:

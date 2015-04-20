@@ -21,9 +21,6 @@ from util import get_values
 from util import verify_stemmer
 from math import log
 
-stemmer = util.NOSTEMMER
-sequence = 1
-
 def leia(filename):
 	logger =  setup_logger(util.NAME_EVALUATION_LOGGER, util.EVALUATION_LOG)
 	
@@ -49,11 +46,17 @@ def leia(filename):
 	
 	return result_list
 
-def do_measures(results):
-	prepare_data(results)
+def do_measures(results, stemmer, sequence):
+	logger =  setup_logger(util.NAME_EVALUATION_LOGGER, util.EVALUATION_LOG)
 	
-	retrieved_results = results[1]
-	expected_results = results[0]
+	prepare_data(results, sequence - 1)
+	
+	retrieved_results = results[sequence - 1]
+	expected_results = results[2]
+	
+	logger.debug(util.CALC_METRIC)
+	
+	start_time = time.time()
 	
 	precisions = precision_for_all(retrieved_results)
 	recalls = recall_for_all(retrieved_results, expected_results)
@@ -67,6 +70,12 @@ def do_measures(results):
 	ndcg = normalized_discounted_cumulative_gain(retrieved_results)
 	eleven_points = grafico_precisao_11_niveis_recall(retrieved_results, expected_results)
 	
+	logger.debug(util.METRIC_CALCULATED % (time.time() - start_time))
+	
+	logger.debug(util.SAVING_METRIC)
+	
+	start_time = time.time()
+	
 	save_in_file(precisions_retrieved, util.PATH + 'precision10K-' + stemmer + '-' + str(sequence) + '.csv')
 	save_in_file(MAP, util.PATH + 'map-' + stemmer + '-' + str(sequence) + '.csv')
 	save_in_file(f1_scores, util.PATH + 'f1-' + stemmer + '-' + str(sequence) + '.csv')
@@ -74,6 +83,8 @@ def do_measures(results):
 	save_in_file(ndcg, util.PATH + 'normalized_discounted_cumulative_gain-' + stemmer + '-' + str(sequence) + '.csv')
 	
 	save_and_plot_in_file(eleven_points, util.PATH + '11points-' + stemmer + '-' + str(sequence))
+	
+	logger.debug(util.METRIC_SAVED % (time.time() - start_time))
 
 def save_in_file(measures, filename):
 	logger = setup_logger(util.NAME_EVALUATION_LOGGER, util.EVALUATION_LOG)
@@ -102,13 +113,15 @@ def save_and_plot_in_file(measures, filename):
 		logger.error(util.NO_FILE_SPECIFIED)
 		exit_error(util.EXITED_WITH_ERROR)
 	
-	logger.debug(util.WRITING_METRIC % (filename + '.pdf'))
+	logger.debug(util.PLOTTING_METRIC % (filename + '.pdf'))
 	
 	recalls = np.array([0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
 	plt.plot(recalls, measures, 'b-')
 	plt.ylabel('Precision')
 	plt.xlabel('Recall')
 	plt.savefig(filename + '.pdf')
+	
+	plt.clf() 
 	
 	logger.debug(util.WRITING_METRIC % (filename + '.csv'))
 	
@@ -119,7 +132,7 @@ def save_and_plot_in_file(measures, filename):
 		
 	fw.close()
 
-def grafico_precisao_11_niveis_recall( retrieved_results, expected_results):
+def grafico_precisao_11_niveis_recall(retrieved_results, expected_results):
 	points = 11
 	
 	mean_precisions = []
@@ -133,17 +146,13 @@ def grafico_precisao_11_niveis_recall( retrieved_results, expected_results):
 		
 		mean_precisions.append(mean_precision)
 		mean_recalls.append(mean_recall)
-		#print('Precision: ' + str(mean_precision))
-		#print('Recall: ' + str(mean_recall))
 		
-	#print(mean_precisions)
-	#print(mean_recalls)
 	precision_recalls = np.zeros(points)
 		
-	for i in range(0,points):
+	for i in range(points):
 		precision_at_k = 0
 		for k in range(len(mean_recalls)):
-			if i <= mean_recalls[k]*10:
+			if i/10 <= mean_recalls[k]:
 				precision_at_k = max(precision_at_k, mean_precisions[k])
 		precision_recalls[i] = precision_at_k
 		
@@ -198,8 +207,11 @@ def precision_at_k(results, K):
 		if i == K - 1:
 			break
 		i = i + 1
-				
-	precision = relevant/K
+	
+	try:			
+		precision = relevant/K
+	except ZeroDivisionError:
+		precision = 0
 	#print(str(precision) + ' = ' + str(relevant) + '/' + str(K) )
 	return precision
 	
@@ -268,9 +280,9 @@ def f1_score(precisions, recalls):
 	
 	return f1_scores
 	
-def prepare_data(results):
-	expected = results[0]
-	retrieved = results[1]
+def prepare_data(results, sequence):
+	expected = results[2]
+	retrieved = results[sequence]
 	
 	for key_expected, key_retrieved in zip(expected, retrieved):
 		if key_expected == key_retrieved:
@@ -292,7 +304,7 @@ def prepare_data(results):
 					
 			retrieved[key_retrieved] = data_retrieved
 			
-	results[1] = retrieved
+	results[sequence] = retrieved
 
 def return_list_from_str(string):
 	string = string[:-1]
@@ -304,24 +316,25 @@ def return_list_from_str(string):
 	elements = []
 	
 	for tuple in list_tuples:
-		if tuple[0] == '[':
-			tuple = tuple[1:]
+		if tuple != '':
+			if tuple[0] == '[':
+				tuple = tuple[1:]
 			
-		if tuple[-1] == ']':
-			tuple = tuple[:-1]
+			if tuple[-1] == ']':
+				tuple = tuple[:-1]
 			
-		list_elements = tuple.split(',')
+			list_elements = tuple.split(',')
 		
-		if (float(list_elements[2]) <= 0.99 and float(list_elements[2]) > 0.6):
-			list_elements[2] = 0
-		elif (float(list_elements[2]) <= 0.6 and float(list_elements[2]) >= 0.001):
-			list_elements[2] = 0
-		elif (float(list_elements[2]) <= 8 and float(list_elements[2]) > 3):
-			list_elements[2] = 1
-		elif (float(list_elements[2]) <= 3 and float(list_elements[2]) >= 0):
-			list_elements[2] = 0
+			if (float(list_elements[2]) <= 0.99 and float(list_elements[2]) > 0.6):
+				list_elements[2] = 0
+			elif (float(list_elements[2]) <= 0.6 and float(list_elements[2]) >= 0.001):
+				list_elements[2] = 0
+			elif (float(list_elements[2]) <= 8 and float(list_elements[2]) > 3):
+				list_elements[2] = 1
+			elif (float(list_elements[2]) <= 3 and float(list_elements[2]) >= 0):
+				list_elements[2] = 0
 		
-		elements.append(list_elements)
+			elements.append(list_elements)
 		
 	return elements
 
@@ -331,6 +344,8 @@ def parse_command_file():
 	config_file = util.EVALUATION_FILENAME
 	
 	results = []
+	stemmers = []
+	sequence = 0
 	
 	if not file_exists(config_file):
 		logger.error(util.FILE_NOT_FOUND % config_file)
@@ -341,16 +356,19 @@ def parse_command_file():
 	with open(config_file) as fp:
 		count = 0
 		for line in fp:
-			if count == 0:
-				global stemmer
+			if count == 0 or count == 2:
 				if verify_stemmer(line, count, util.NAME_EVALUATION_LOGGER, util.EVALUATION_LOG):
-					stemmer = util.STEMMER
+					stemmers.append(util.STEMMER)
+				else:
+					stemmers.append(util.NOSTEMMER)
+					
+				sequence = sequence + 1
 				count = count + 1
 				continue
 			
 			next_cmd, filename = get_values(line, count, util.CONFIG_SEPARATOR, util.NAME_EVALUATION_LOGGER, util.EVALUATION_LOG)
 			
-			if next_cmd == util.CMD_LEIA and (count == 1 or count == 2):
+			if next_cmd == util.CMD_LEIA and (count == 1 or count == 3 or count == 4):
 				returned_results = leia(filename)
 				results.append(returned_results)
 				
@@ -362,7 +380,8 @@ def parse_command_file():
 	logger.debug(util.LINES_READED_CONFIG % count)
 	logger.debug(util.CONFIG_END_PROCESSING % config_file)
 	
-	do_measures(results)
+	for i in range(sequence):
+		do_measures(results, stemmers[i], i + 1)
 
 if __name__ == "__main__":
 	parse_command_file()
