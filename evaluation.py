@@ -64,7 +64,7 @@ def do_measures(results, stemmer, sequence):
 	precisions_retrieved = precision_for_all(retrieved_results, 10)
 	precisions_expected = precision_for_all(expected_results, 10)
 	
-	MAP = mean_average_precision(precisions_retrieved, precisions_expected)
+	MAP = mean_average_precision(retrieved_results)
 	f1_scores = f1_score(precisions, recalls)
 	dcg = discounted_cumulative_gain(retrieved_results)
 	ndcg = normalized_discounted_cumulative_gain(retrieved_results)
@@ -95,7 +95,7 @@ def save_in_file(measures, filename):
 	
 	logger.debug(util.WRITING_METRIC % filename)
 	
-	fw = open(filename, 'w') 
+	fw = open(filename, 'w')
 	
 	if isinstance(measures, collections.Sequence):
 		for pair in measures:
@@ -228,6 +228,7 @@ def recall_at_k(results, relevants_nonretrieved, K):
 	try:
 		recall = relevant/(relevant + relevants_nonretrieved)
 		#print(str(recall) + ' = ' + str(relevant) + '/' + str(relevant) + ' + ' + str(relevants_nonretrieved))
+		
 	except ZeroDivisionError:
 		recall = 0
 		#print(str(recall) + ' = ' + str(relevant) + '/' + str(relevant) + ' + ' + str(relevants_nonretrieved))
@@ -242,12 +243,29 @@ def nonretrieved(data_expected, data_retrieved):
 	
 	return relevants_nonretrieved
 	
-def mean_average_precision(precisions_retrieved, precisions_expected):
-	all_precisions_retrieved =	[precision[1] for precision in precisions_retrieved]
-	all_precisions_expected =	[precision[1] for precision in precisions_expected]
-	mean_retrieved = np.mean(all_precisions_retrieved)
-	mean_expected = np.mean(all_precisions_expected)
-	return np.mean([mean_retrieved, mean_expected])
+def average_precision(retrieved):
+	index = range(len(retrieved))
+	precisions = []
+	
+	for i in index:
+		if retrieved[i][2] == 1:
+			precision = precision_at_k(retrieved, i)
+			precisions.append(precision)
+	
+	if not precisions:
+		return 0.0
+	else:
+		return np.mean(precisions)
+	
+def mean_average_precision(retrieved_results):
+	
+	average_precision_retrieved = []
+	
+	for key_retrieved in retrieved_results:
+		ap = average_precision(retrieved_results[key_retrieved])
+		average_precision_retrieved.append(ap)
+	
+	return np.mean(average_precision_retrieved)
 	
 def discounted_cumulative_gain(results):
 	dcg = []
