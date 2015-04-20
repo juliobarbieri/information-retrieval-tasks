@@ -289,7 +289,7 @@ def f1_score(precisions, recalls):
 			try:
 				f1 = 2*(precision[1] * recall[1])/(precision[1] + recall[1])
 			except ZeroDivisionError:
-				f1 = 0
+				f1 = 0.0
 			f1_scores.append([precision[0], f1])
 	
 	return f1_scores

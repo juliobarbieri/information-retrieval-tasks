@@ -19,3 +19,6 @@ Gerador Lista Invertida: inverted_index_generator.py
 Indexador: indexer.py
 Processador de Consultas: query_processor.py
 Buscador: searcher.py
+Avaliador: evaluator.py
+
+OBS: O módulo Avaliador não é executado automaticamente quando se executa o sistema inteiro, sendo necessária sua execução separada. Para a sua execução é necessário que o usuário tenha dois arquivos de resultados de uma mesma base válidos, além de um arquivo de resultados esperados.
