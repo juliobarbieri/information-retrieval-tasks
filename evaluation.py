@@ -212,7 +212,6 @@ def precision_at_k(results, K):
 		precision = relevant/K
 	except ZeroDivisionError:
 		precision = 0
-	#print(str(precision) + ' = ' + str(relevant) + '/' + str(K) )
 	return precision
 	
 def recall_at_k(results, relevants_nonretrieved, K):
@@ -227,11 +226,8 @@ def recall_at_k(results, relevants_nonretrieved, K):
 	
 	try:
 		recall = relevant/(relevant + relevants_nonretrieved)
-		#print(str(recall) + ' = ' + str(relevant) + '/' + str(relevant) + ' + ' + str(relevants_nonretrieved))
-		
 	except ZeroDivisionError:
 		recall = 0
-		#print(str(recall) + ' = ' + str(relevant) + '/' + str(relevant) + ' + ' + str(relevants_nonretrieved))
 	return recall
 	
 def nonretrieved(data_expected, data_retrieved):

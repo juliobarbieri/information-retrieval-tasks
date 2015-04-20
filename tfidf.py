@@ -17,7 +17,6 @@ class TfIdf:
 		weights = []
 		for i in range(len(tf)):
 			tf_idf = self.term_frquency(tf[i], max_tf) * self.idf(total_documentos, n)
-			#print(str(tf[i]) + '/' + str(max_tf) + ' * log(' + str(total_documentos) + '/' + str(n) + ')')
 			weights.append(tf_idf)
 		return weights
 	
