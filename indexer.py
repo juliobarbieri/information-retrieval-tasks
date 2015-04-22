@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Created on Tue Mar 24 2015
+Created on Mon Apr 20 2015
 @author: Julio Barbieri
 """
 
@@ -15,7 +15,6 @@ from util import file_exists
 from util import exit_error
 from util import setup_logger
 from util import get_values
-from util import verify_stemmer
 from util import format_text
 from xml.etree.ElementTree import ElementTree
 from nltk.stem.porter import PorterStemmer

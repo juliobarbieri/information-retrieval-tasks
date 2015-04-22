@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Created on Wed Apr 1 2015
+Created on Mon Apr 20 2015
 @author: Julio Barbieri
 """
 
@@ -12,36 +12,26 @@ import pickle
 import time
 import re
 import util
-from tfidf import TfIdf
+import sys
+import lucene
 from util import file_exists
 from util import exit_error
 from util import setup_logger
-from util import verify_stemmer
 from util import get_values
 from util import valida_termo
-from engine import Engine
-from vector_space_model import VectorSpaceModel
 from xml.etree.ElementTree import ElementTree
 from nltk.stem.porter import PorterStemmer
 from math import log
 
-stemmer = None
+from java.io import File
+from org.apache.lucene.analysis.standard import StandardAnalyzer
+from org.apache.lucene.document import Document, Field
+from org.apache.lucene.search import IndexSearcher
+from org.apache.lucene.index import IndexReader
+from org.apache.lucene.queryparser.classic import QueryParser
+from org.apache.lucene.store import SimpleFSDirectory
+from org.apache.lucene.util import Version
 
-def modelo(filename):
-	logger = setup_logger(util.NAME_SEARCHER_LOGGER, util.SEARCHER_LOG)
-	
-	if not file_exists(filename):
-		logger.error(util.FILE_NOT_FOUND % filename)
-		exit_error(util.EXITED_WITH_ERROR)
-	
-	afile = open(filename, 'rb')
-	struct = pickle.load(afile)
-	afile.close()
-	
-	logger.debug(util.STRUCTURE_LOADED % filename)
-	
-	return struct
-	
 def consultas(filename, struct):
 	logger = setup_logger(util.NAME_SEARCHER_LOGGER, util.SEARCHER_LOG)
 	
@@ -52,7 +42,6 @@ def consultas(filename, struct):
 	logger.debug(util.READING_QUERIES % filename)
 	
 	query_list = {}
-	query_results = {}
 	
 	with open(filename) as fp:
 		count = 0
@@ -65,8 +54,30 @@ def consultas(filename, struct):
 	
 	start_time = time.time()
 	
-	engine = Engine(TfIdf(), struct)
-	query_results = engine.search(query_list)
+	lucene.initVM()
+	analyzer = StandardAnalyzer(Version.LUCENE_4_9)
+	reader = IndexReader.open(SimpleFSDirectory(File("index/")))
+	searcher = IndexSearcher(reader)
+	
+	query_results = {}
+	
+	for key in query_list:
+		queryParser = QueryParser(Version.LUCENE_4_9, "content", analyzer)
+		#print queryParser.escape(query_list[key])
+		query = queryParser.parse(query_list[key].replace(' OR ', ' '))
+		MAX = 1000
+		hits = searcher.search(query, MAX)
+	
+		#print "Found %d document(s) that matched query '%s':" % (hits.totalHits, query)
+		rank = []
+		i = 1
+		for hit in hits.scoreDocs:
+			doc = searcher.doc(hit.doc)
+			document_key = doc.get("key").encode("utf-8")
+			element = [i, int(document_key), hit.score]
+			rank.append(element)
+			i = i + 1
+		query_results[key] = rank
 	
 	logger.debug(util.QUERIES_TIME % (time.time() - start_time))
 	
@@ -89,7 +100,8 @@ def resultados(filename, query_results):
 	fw.close()
 	
 def trata_query(line):
-
+	stemmer = PorterStemmer()
+	
 	line = line[:-1]
 	vet_line = line.split(util.CSV_SEPARATOR)
 	
@@ -104,17 +116,15 @@ def trata_query(line):
 		if valida_termo(word) == None:
 			words_array.remove(word)
 	
-	if stemmer:
-		words_array = [stemmer.stem(word).upper() for word in words_array]
+	words_array = [stemmer.stem(word).upper() for word in words_array]
 	
-	return (identifier, words_array)
+	return (identifier, ' '.join(words_array))
 	
 def parse_command_file():
 	logger =  setup_logger(util.NAME_SEARCHER_LOGGER, util.SEARCHER_LOG)
 	
 	query_results = {}
 	
-	model = False
 	query = False
 	results = False
 	config_file = util.SEARCHER_FILENAME
@@ -130,21 +140,13 @@ def parse_command_file():
 	with open(config_file) as fp:
 		count = 0
 		for line in fp:
-			if count == 0:
-				global stemmer
-				stemmer = verify_stemmer(line, count, util.NAME_IIG_LOGGER, util.II_GENERATOR_LOG)
-				count = count + 1
-				continue
 			
 			next_cmd, filename = get_values(line, count, util.CONFIG_SEPARATOR, util.NAME_SEARCHER_LOGGER, util.SEARCHER_LOG)
 			
-			if next_cmd == util.CMD_MODELO and results == False:
-				model = True
-				struct = modelo(filename)
-			elif next_cmd == util.CMD_CONSULTAS and model == True and results == False:
+			if next_cmd == util.CMD_CONSULTAS and results == False:
 				query = True
 				query_results = consultas(filename, struct)
-			elif next_cmd == util.CMD_RESULTADOS and model == True and query == True and results == False:
+			elif next_cmd == util.CMD_RESULTADOS and query == True and results == False:
 				results = True
 				resultados(filename, query_results)
 			else:

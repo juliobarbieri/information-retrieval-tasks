@@ -14,7 +14,6 @@ from nltk.stem.porter import PorterStemmer
 
 CONFIG_SEPARATOR		=	'='
 CSV_SEPARATOR			=	';'
-GENERATOR_FILENAME		=	'config/gli.cfg'
 INDEXER_FILENAME		=	'config/index.cfg'
 QP_FILENAME				=	'config/pc.cfg'
 SEARCHER_FILENAME		=	'config/busca.cfg'
@@ -104,7 +103,7 @@ def setup_logger(name, filename):
 		logger.addHandler(file_handler)
 		
 	return logger
-
+	
 def verify_stemmer(line, count, log_name, log_file):
 	logger =  setup_logger(log_name, log_file)
 	
@@ -120,7 +119,7 @@ def verify_stemmer(line, count, log_name, log_file):
 	else:
 		logger.error(NE_INSTRUCTION_ERROR + str(count + 1))
 		exit_error(EXITED_WITH_ERROR)
-	
+
 def get_values(line, count, separator, log_name, log_file):
 	logger =  setup_logger(log_name, log_file)
 	

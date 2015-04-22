@@ -194,7 +194,7 @@ def recall_for_all(retrieved, expected, K = -1):
 			else:
 				recall = recall_at_k(rank, len(relevants_nonretrieved), K)
 			
-			recalls.append([key_retrieved, round(recall)])
+			recalls.append([key_retrieved, round(recall, 2)])
 			
 	return recalls
 	
@@ -210,6 +210,7 @@ def precision_at_k(results, K):
 	
 	try:			
 		precision = relevant/K
+		#print str(precision) + ' = ' + str(relevant) + '/' + str(K)
 	except ZeroDivisionError:
 		precision = 0
 	return precision
