@@ -8,7 +8,6 @@ Created on Mon Apr 20 2015
 import numpy as np
 import nltk
 import logging
-import pickle
 import time
 import re
 import util
@@ -50,25 +49,23 @@ def consultas(filename, struct):
 			query_list[key] = query
 			count = count + 1
 			
-	logger.debug(util.LINES_READED_FILE % (count, filename))
-	
-	start_time = time.time()
-	
 	lucene.initVM()
 	analyzer = StandardAnalyzer(Version.LUCENE_4_9)
 	reader = IndexReader.open(SimpleFSDirectory(File("index/")))
 	searcher = IndexSearcher(reader)
 	
+	logger.debug(util.LINES_READED_FILE % (count, filename))
+	
+	start_time = time.time()
+	
 	query_results = {}
 	
 	for key in query_list:
 		queryParser = QueryParser(Version.LUCENE_4_9, "content", analyzer)
-		#print queryParser.escape(query_list[key])
-		query = queryParser.parse(query_list[key].replace(' OR ', ' '))
+		query = queryParser.parse(queryParser.escape(query_list[key]))
 		MAX = 1000
 		hits = searcher.search(query, MAX)
 	
-		#print "Found %d document(s) that matched query '%s':" % (hits.totalHits, query)
 		rank = []
 		i = 1
 		for hit in hits.scoreDocs:
@@ -108,7 +105,6 @@ def trata_query(line):
 	identifier = vet_line[0]
 	query = vet_line[1]
 	
-	query = query.replace('/', ' ')
 	query = re.sub(' +',' ',query)
 	words_array = nltk.word_tokenize(query)
 	

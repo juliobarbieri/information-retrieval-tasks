@@ -210,7 +210,6 @@ def precision_at_k(results, K):
 	
 	try:			
 		precision = relevant/K
-		#print str(precision) + ' = ' + str(relevant) + '/' + str(K)
 	except ZeroDivisionError:
 		precision = 0
 	return precision

@@ -79,6 +79,7 @@ QUERIES_TIME			=	'As consultas requeridas foram processadas e realizadas em %s s
 DOCUMENTS_TIME			=	'Os documentos requeridos foram lidos e processados em %s segundos.'
 WORDS_TIME				=	'As palavras requeridas foram lidas e processadas em %s segundos.'
 INDEX_TIME				=	'Os documentos foram indexados em %s segundos.'
+INDEX_START				=	'Indexação dos documentos solicitados iniciada.'
 
 QUERIES_READ_TIME		=	'As consultas foram lidas e processadas em %s segundos'
 

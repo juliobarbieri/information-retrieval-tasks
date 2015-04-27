@@ -15,6 +15,7 @@ from util import file_exists
 from util import exit_error
 from util import setup_logger
 from util import get_values
+from util import valida_termo
 from util import format_text
 from xml.etree.ElementTree import ElementTree
 from nltk.stem.porter import PorterStemmer
@@ -67,11 +68,19 @@ def index(abstract_list):
 	writerConfig = IndexWriterConfig(Version.LUCENE_4_9, StandardAnalyzer(Version.LUCENE_4_9))
 	writer = IndexWriter(indexDir, writerConfig)
 	
+	logger.debug(util.INDEX_START)
+	start_time = time.time()
+	
 	for key in abstract_list:
 		stemmer = PorterStemmer()
 		stopwords = set(nltk.corpus.stopwords.words('english'))
 		words = nltk.word_tokenize(abstract_list[key])
 		words = [stemmer.stem(word).upper() for word in words if word not in stopwords]
+		
+		for word in words:
+			if valida_termo(word) == None:
+				words.remove(word)
+		
 		prepared_document = ' '.join(words)
 		
 		doc = Document()
@@ -80,13 +89,9 @@ def index(abstract_list):
 		doc.add(Field("content", prepared_document, Field.Store.YES, Field.Index.ANALYZED))
 		
 		writer.addDocument(doc)
-		
-	#for n, l in enumerate(sys.stdin):
-	#	doc = Document()
-	#	doc.add(Field("text", l, Field.Store.YES, Field.Index.ANALYZED))
-	#	writer.addDocument(doc)
-	#print "Indexed %d lines from stdin (%d docs in index)" % (n, writer.numDocs())
-	#print "Closing index of %d docs..." % writer.numDocs()
+	
+	logger.debug(util.INDEX_TIME % (time.time() - start_time))
+	
 	writer.close()
 	
 def parse_command_file():
