@@ -1,6 +1,6 @@
-SISTEMA DE RECUPERAÇÃO EM MEMÓRIA SEGUNDO O MODELO VETORIAL
+SISTEMA DE RECUPERAÇÃO EM MEMÓRIA UTILIZANDO O LUCENE
 
-Para utilização do sistema em questão, é necessária a instalação do Python3, juntamente com a biblioteca NLTK.
+Para utilização do sistema em questão, é necessária a instalação do Python2, Python3, juntamente com a biblioteca NLTK e o PyLucene.
 
 Formas de utilização
 
@@ -11,14 +11,13 @@ Devem ser seguidos os seguintes passos para sua execução.
 - Navegar até a pasta onde está contido o código fonte do sistema.
 - Executar o comando python3 main.py ou python main.py, dependendo da versão principal do python em seu sistema.
 - Em sistemas Windows pode ser necessária a utilização do caminho completo para o interpretador Python.
-	Exemplo: C:\Python34\python.exe main.py
+	Exemplo: C:\Python27\python.exe main.py
 
 Para execução de um módulo separadamente, ao invés de main.py, deve-se escolher o arquivo do módulo correspondente.
 
-Gerador Lista Invertida: inverted_index_generator.py
 Indexador: indexer.py
 Processador de Consultas: query_processor.py
 Buscador: searcher.py
 Avaliador: evaluator.py
 
-OBS: O módulo Avaliador não é executado automaticamente quando se executa o sistema inteiro, sendo necessária sua execução separada. Para a sua execução é necessário que o usuário tenha dois arquivos de resultados de uma mesma base válidos, além de um arquivo de resultados esperados.
+OBS: O módulo Avaliador não é executado automaticamente quando se executa o sistema inteiro, sendo necessária sua execução separada. Para a sua execução é necessário que o usuário tenha dois arquivos de resultados de uma mesma base válidos, além de um arquivo de resultados esperados. O Avaliador é utilizado, preferencialmente, o Python3 ao invés do Python2
